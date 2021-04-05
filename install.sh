@@ -5,4 +5,4 @@ rm -rf ~/.fzf
 cp -r submodules/fzf ~/.fzf
 ~/.fzf/install --all
 
-stow vim
+stow vim tmux
