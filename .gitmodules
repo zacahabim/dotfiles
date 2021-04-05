@@ -4,3 +4,12 @@
 [submodule "submodules/vim-commentary"]
 	path = submodules/vim-commentary
 	url = https://github.com/tpope/vim-commentary
+[submodule "submodules/vim-fugitive"]
+	path = submodules/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git
+[submodule "submodules/vim-polyglot"]
+	path = submodules/vim-polyglot
+	url = https://github.com/sheerun/vim-polyglot.git
+[submodule "submodules/tabular"]
+	path = submodules/tabular
+	url = https://github.com/godlygeek/tabular.git
