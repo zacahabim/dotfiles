@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
-./submodules/fzf/install --all
+rm -rf ~/.fzf
+
+cp -r submodules/fzf ~/.fzf
+~/.fzf/install --all
 
 stow vim
