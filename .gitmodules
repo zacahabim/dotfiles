@@ -13,3 +13,9 @@
 [submodule "submodules/tabular"]
 	path = submodules/tabular
 	url = https://github.com/godlygeek/tabular.git
+[submodule "submodules/fzf.vim"]
+	path = submodules/fzf.vim
+	url = https://github.com/junegunn/fzf.vim.git
+[submodule "submodules/fzf"]
+	path = submodules/fzf
+	url = https://github.com/junegunn/fzf.git
