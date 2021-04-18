@@ -19,3 +19,6 @@
 [submodule "submodules/fzf"]
 	path = submodules/fzf
 	url = https://github.com/junegunn/fzf.git
+[submodule "submodules/vim-vinegar"]
+	path = submodules/vim-vinegar
+	url = https://github.com/tpope/vim-vinegar.git
