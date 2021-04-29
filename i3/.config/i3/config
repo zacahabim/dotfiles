@@ -235,7 +235,7 @@ exec --no-startup-id "setxkbmap -option caps:escape"
 # turn of the screen after being inactive for 5 minutes
 exec_always --no-startup-id "xset dpms 0 0 300"
 
-Focus_follows_mouse no
+Focus_follows_mouse yes
 
 # switch mouse handedness
 #exec --no-startup-id xmodmap -e "pointer = 3 2 1" # left hand
