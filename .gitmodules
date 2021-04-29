@@ -22,3 +22,6 @@
 [submodule "submodules/vim-vinegar"]
 	path = submodules/vim-vinegar
 	url = https://github.com/tpope/vim-vinegar.git
+[submodule "submodules/vim-ttcn"]
+	path = submodules/vim-ttcn
+	url = https://github.com/gustafj/vim-ttcn.git
