@@ -31,6 +31,11 @@ runtime macros/matchit.vim
 " enable mouse rolling
 if has("mouse")
     set mouse=a
+	if has("mouse_sgr")
+		set ttymouse=sgr
+	else
+		set ttymouse=xterm2
+	end
 endif
 
 if has("gui_macvim")
