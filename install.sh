@@ -7,4 +7,6 @@ rm -rf ~/.fzf
 cp -r submodules/fzf ~/.fzf
 ~/.fzf/install --all
 
-stow vim tmux i3 xsession
+rm -rf ~/.vim
+rm ~/.tmux.conf
+stow --target=$HOME vim tmux xsession
