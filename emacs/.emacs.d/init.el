@@ -28,6 +28,9 @@
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 
+(require 'ttcn3)
+(add-to-list 'auto-mode-alist '("\\.ttcn\\'" . ttcn-3-mode))
+
 ;; Set this to save the clipboard content before killing
 ;; Thus, enable C-y M-y to copy things from clipboard after killing something
 (setq save-interprogram-paste-before-kill t)
@@ -264,10 +267,9 @@
 (use-package goto-last-change
   :bind (("C-;" . goto-last-change)))
 
-
 ;; expand the selection of the region based on mode
 (use-package expand-region
-  :bind ("C-=" . er/expand-region))
+  :bind ("C-i" . er/expand-region))
 
 ;; highlight strings with colors
 (use-package rainbow-mode
