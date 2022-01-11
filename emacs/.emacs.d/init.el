@@ -1,13 +1,13 @@
 ;; Set up clipboard
 ;; (defun copy-from-osx ()
 ;; (shell-command-to-string "pbpaste"))
-;; 
+;;
 ;; (defun paste-to-osx (text &optional push)
 ;; (let ((process-connection-type nil))
 ;; (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
 ;; (process-send-string proc text)
 ;; (process-send-eof proc))))
-;; 
+;;
 ;; (setq interprogram-cut-function 'paste-to-osx)
 ;; (setq interprogram-paste-function 'copy-from-osx)
 
@@ -22,7 +22,7 @@
 (require 'redo+)
 ;; normal redo
 (define-key global-map (kbd "C-/") 'undo)
-(define-key global-map (kbd "C-x /") 'redo)
+(define-key global-map (kbd "C-x C-/") 'redo)
 
 (require 'exec-path-from-shell)
 (when (memq window-system '(mac ns x))
@@ -34,6 +34,13 @@
 
 ;; Set fill column guide
 (global-display-fill-column-indicator-mode 1)
+
+;; delete trailing whitespace
+(add-hook 'before-save-hook 'my-prog-nuke-trailing-whitespace)
+
+(defun my-prog-nuke-trailing-whitespace ()
+  (when (derived-mode-p 'prog-mode)
+    (delete-trailing-whitespace)))
 
 ;; Package sources
 (require 'package)                   ; Bring in to the environment all package management functions
@@ -92,6 +99,10 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 
+;; enable winner mode (undo, redo window configuration)
+;; this enable zooming with C-x 1 then back with C-c left
+(winner-mode 1)
+
 ;; Disable bell ringing
 (setq ring-bell-function 'ignore)
 
@@ -131,13 +142,16 @@
 
 (global-set-key "%" 'match-paren)
 
+;; Often used commands
+(global-set-key (kbd "C-c b r") 'revert-buffer)
+
 ;; No tab indentation. If I just want one tab then use C-q (quoted-insert) to insert as a literal.
 (setq-default indent-tabs-mode nil)
 
 ;; set mark ring
 ;; Popping the mark ring with C-u C-SPC C-SPC ...
 (setq set-mark-command-repeat-pop t)
-(setq mark-ring-max 48)
+(setq mark-ring-max 32)
 
 ;; show matching parentheses
 (show-paren-mode 1)
@@ -147,13 +161,25 @@
 ;; Custom packages
 ;; ================================================================================
 ;; fuzzy search
-(use-package fzf
-  :bind (("C-c g f" . fzf-git)
-         ("C-c f f" . fzf)))
+;; (use-package fzf
+;;   :bind
+;;   ("C-c g f" . fzf-git)
+;;   ("C-c f f" . fzf)
+;; )
 
 ;; rg & projectile to search project
 (use-package deadgrep
-  :bind (("C-c g g" . deadgrep)))
+  :config
+  (defun pp/deadgrep-view-file ()
+  "View result under cursor in other window."
+  (interactive)
+  (deadgrep-visit-result-other-window)
+  (other-window 1))
+  :bind
+  ("C-c d g" . deadgrep)
+  (:map deadgrep-mode-map
+              ("C-o" . pp/deadgrep-view-file))
+)
 
 ;; Record key frequency
 ;; Check with keyfreq-show
@@ -169,8 +195,7 @@
     (global-undo-tree-mode 1))
 
 ;; Git
-(use-package magit
-  :bind ("C-x g" . magit-status))
+(use-package magit)
 
 ;; Ivy
 (use-package ivy
@@ -182,7 +207,13 @@
 
 ;; counsel: collection of ivy enhancement
 (use-package counsel
-  :bind (("M-x" . counsel-M-x)))
+  :bind
+  ("M-x" . counsel-M-x)
+  ("C-c f f" . counsel-locate)
+  ("C-c g f" . counsel-git)
+  ("C-c g g" . counsel-git-grep)
+  ("C-c r g" . counsel-rg)
+)
 
 ;; sort and filter candidate for ivy/counsel
 (use-package prescient)
@@ -207,6 +238,20 @@
 (use-package rainbow-delimiters
   :config
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+
+;; Change frame composition
+(use-package transpose-frame)
+
+;; Autocomplete
+(use-package auto-complete
+  :config
+  (ac-config-default)
+)
+
+;; ================================================================================
+;; Language support
+
+(use-package groovy-mode)
 
 ;; ================================================================================
 
@@ -247,14 +292,14 @@
     :config
     (add-to-list 'eglot-server-programs '(elm-mode . ("elm-language-server" "--stdio"))))
 
-;; snippets
-(use-package yasnippet
-    :config
-    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
-    (yas-global-mode 1))
+;; ;; snippets
+;; (use-package yasnippet
+;;     :config
+;;     (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+;;     (yas-global-mode 1))
 
 ;; pre-made snippets
-(use-package yasnippet-snippets)
+;; (use-package yasnippet-snippets)
 
 ;; Extra
 ;; (use-package writegood-mode
@@ -269,7 +314,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(yasnippet-snippets writegood-mode which-key use-package undo-tree smartparens rainbow-mode rainbow-delimiters magit keyfreq ivy-prescient ivy-hydra goto-last-change git-gutter fzf expand-region eglot dumb-jump deadgrep counsel benchmark-init))
+   '(auto-complete transpose-frame yasnippet-snippets writegood-mode which-key use-package undo-tree smartparens rainbow-mode rainbow-delimiters magit keyfreq ivy-prescient ivy-hydra goto-last-change git-gutter fzf expand-region eglot dumb-jump deadgrep counsel benchmark-init))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
