@@ -14,6 +14,20 @@
 ;; Load theme
 (load-theme 'tango-dark t)
 
+;; Set the color scheme for the terminal. Zenburn
+(custom-set-faces
+ '(term-color-black ((t (:foreground "#3F3F3F" :background "#2B2B2B"))))
+ '(term-color-red ((t (:foreground "#AC7373" :background "#8C5353"))))
+ '(term-color-green ((t (:foreground "#7F9F7F" :background "#9FC59F"))))
+ '(term-color-yellow ((t (:foreground "#DFAF8F" :background "#9FC59F"))))
+ '(term-color-blue ((t (:foreground "#7CB8BB" :background "#4C7073"))))
+ '(term-color-magenta ((t (:foreground "#DC8CC3" :background "#CC9393"))))
+ '(term-color-cyan ((t (:foreground "#93E0E3" :background "#8CD0D3"))))
+ '(term-color-white ((t (:foreground "#DCDCCC" :background "#656555"))))
+ '(term-default-fg-color ((t (:inherit term-color-white))))
+ '(term-default-bg-color ((t (:inherit term-color-black))))
+ )
+
 ;; custom *.el scripts
 ;; add your modules path
 (add-to-list 'load-path "~/.emacs.d/custom/")
@@ -22,28 +36,52 @@
 (require 'redo+)
 ;; normal redo
 (define-key global-map (kbd "C-/") 'undo)
+(define-key global-map (kbd "C-_") 'undo)
 (define-key global-map (kbd "C-x C-/") 'redo)
+;; In terminal, C-x C-/ is interpreted as C-x C-_ Dont' know why yet.
+(define-key global-map (kbd "C-x C-_") 'redo)
 
 (require 'exec-path-from-shell)
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 
-(require 'ttcn3)
-(add-to-list 'auto-mode-alist '("\\.ttcn\\'" . ttcn-3-mode))
-
 ;; Set this to save the clipboard content before killing
 ;; Thus, enable C-y M-y to copy things from clipboard after killing something
 (setq save-interprogram-paste-before-kill t)
 
-;; Set fill column guide
-(global-display-fill-column-indicator-mode 1)
+;; Set fill column guide to programming mode
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+
+;; Set initial scratch text empty
+(setq initial-scratch-message "")
+
+;; disable splash screen
+(setq inhibit-splash-screen t)
+
+;; enable transient mode
+(transient-mark-mode 1)
 
 ;; delete trailing whitespace
-(add-hook 'before-save-hook 'my-prog-nuke-trailing-whitespace)
+;; (add-hook 'before-save-hook 'my-prog-nuke-trailing-whitespace)
 
-(defun my-prog-nuke-trailing-whitespace ()
-  (when (derived-mode-p 'prog-mode)
-    (delete-trailing-whitespace)))
+;; (defun my-prog-nuke-trailing-whitespace ()
+;;   (when (derived-mode-p 'prog-mode)
+;;     (delete-trailing-whitespace)))
+
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+
+(defun sudo-save ()
+  (interactive)
+  (if (not buffer-file-name)
+      (write-file (concat "/sudo:root@localhost:" (ido-read-file-name "File:")))
+    (write-file (concat "/sudo:root@localhost:" buffer-file-name))))
+
+(defun sudo-save ()
+  (interactive)
+  (if (not buffer-file-name)
+      (write-file (concat "/sudo:root@localhost:" (ido-read-file-name "File:")))
+    (write-file (concat "/sudo:root@localhost:" buffer-file-name))))
 
 ;; Package sources
 (require 'package)                   ; Bring in to the environment all package management functions
@@ -90,6 +128,16 @@
   (find-file "~/.emacs.d/init.el"))
 
 (global-set-key (kbd "C-c I") 'find-config)
+
+;; personal org
+;; TODO: Add argument to this function
+(defun find-note ()
+  "Edit personal note"
+  (interactive)
+  (find-file "~/prog/org/notes.org"))
+
+(global-set-key (kbd "C-c N") 'find-note)
+
 
 ;; Move around a bit faster
 (global-set-key (kbd "M-n") (kbd "C-u 10 C-n"))
@@ -191,6 +239,10 @@
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
+(use-package xclip
+  :config
+  (xclip-mode 1))
+
 ;; visualize undo tree
   (use-package undo-tree
     :defer 5
@@ -214,8 +266,7 @@
   ("M-x" . counsel-M-x)
   ("C-c f f" . counsel-locate)
   ("C-c g f" . counsel-git)
-  ("C-c g g" . counsel-git-grep)
-  ("C-c r g" . counsel-rg)
+  ("C-c g g" . vc-git-grep)
 )
 
 ;; sort and filter candidate for ivy/counsel
@@ -251,13 +302,6 @@
   (ac-config-default)
 )
 
-;; ================================================================================
-;; Language support
-
-(use-package groovy-mode)
-
-;; ================================================================================
-
 ;; No help screen
 (defun copy-from-osx ()
 (shell-command-to-string "pbpaste"))
@@ -269,7 +313,7 @@
 
 ;; expand the selection of the region based on mode
 (use-package expand-region
-  :bind ("C-i" . er/expand-region))
+  :bind ("C-=" . er/expand-region))
 
 ;; highlight strings with colors
 (use-package rainbow-mode
@@ -288,12 +332,6 @@
   :config
   (global-git-gutter-mode 't))
 
-;; auto-complete
-  (use-package eglot
-    :commands eglot
-    :config
-    (add-to-list 'eglot-server-programs '(elm-mode . ("elm-language-server" "--stdio"))))
-
 ;; ;; snippets
 ;; (use-package yasnippet
 ;;     :config
@@ -302,25 +340,70 @@
 
 ;; pre-made snippets
 ;; (use-package yasnippet-snippets)
-
+;;
 ;; Extra
 ;; (use-package writegood-mode
 ;;   :bind ("C-c g" . writegood-mode)
 ;;   :config
 ;;   (add-to-list 'writegood-weasel-words "actionable"))
 
-;; Custome stuffs from the environment
+;; ================================================================================
+;; Language support
+
+(use-package groovy-mode)
+(use-package yaml-mode)
+(use-package markdown-mode)
+
+(require 'ttcn3)
+(add-to-list 'auto-mode-alist '("\\.ttcn\\'" . ttcn-3-mode))
+
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable))
+
+;; auto-complete
+  (use-package eglot
+    :commands eglot
+    :config
+    (add-to-list 'eglot-server-programs '(elm-mode . ("elm-language-server" "--stdio"))))
+;; ================================================================================
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(auto-complete transpose-frame yasnippet-snippets writegood-mode which-key use-package undo-tree smartparens rainbow-mode rainbow-delimiters magit keyfreq ivy-prescient ivy-hydra goto-last-change git-gutter fzf expand-region eglot dumb-jump deadgrep counsel benchmark-init))
+   '(elpy xclip yasnippet-snippets yaml-mode writegood-mode which-key use-package undo-tree transpose-frame smartparens rainbow-mode rainbow-delimiters markdown-mode magit keyfreq ivy-prescient ivy-hydra groovy-mode goto-last-change git-gutter fzf expand-region eglot dumb-jump deadgrep counsel benchmark-init auto-complete))
+ '(safe-local-variable-values
+   '((eval let
+           ((pwd
+             (file-truename default-directory)))
+           (while
+               (not
+                (file-exists-p
+                 (concat pwd dir-locals-file)))
+             (setq pwd
+                   (file-name-directory
+                    (directory-file-name pwd))))
+           (let
+               ((tags-file
+                 (concat pwd "out/TAGS."
+                         (car
+                          (split-string
+                           (symbol-name major-mode)
+                           "-")))))
+             (when
+                 (file-exists-p tags-file)
+               (set
+                (make-local-variable 'tags-file-name)
+                tags-file))))))
+ '(show-paren-mode t)
  '(tool-bar-mode nil))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Ubuntu Mono" :foundry "DAMA" :slant normal :weight normal :height 120 :width normal)))))
+ '(default ((t (:height 100 :family "Go Mono")))))
