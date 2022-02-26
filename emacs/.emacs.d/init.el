@@ -11,22 +11,25 @@
 ;; (setq interprogram-cut-function 'paste-to-osx)
 ;; (setq interprogram-paste-function 'copy-from-osx)
 
-;; Load theme
-(load-theme 'tango-dark t)
-
 ;; Set the color scheme for the terminal. Zenburn
 (custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:height 100 :family "Go Mono"))))
  '(term-color-black ((t (:foreground "#3F3F3F" :background "#2B2B2B"))))
- '(term-color-red ((t (:foreground "#AC7373" :background "#8C5353"))))
- '(term-color-green ((t (:foreground "#7F9F7F" :background "#9FC59F"))))
- '(term-color-yellow ((t (:foreground "#DFAF8F" :background "#9FC59F"))))
  '(term-color-blue ((t (:foreground "#7CB8BB" :background "#4C7073"))))
- '(term-color-magenta ((t (:foreground "#DC8CC3" :background "#CC9393"))))
  '(term-color-cyan ((t (:foreground "#93E0E3" :background "#8CD0D3"))))
+ '(term-color-green ((t (:foreground "#7F9F7F" :background "#9FC59F"))))
+ '(term-color-magenta ((t (:foreground "#DC8CC3" :background "#CC9393"))))
+ '(term-color-red ((t (:foreground "#AC7373" :background "#8C5353"))))
  '(term-color-white ((t (:foreground "#DCDCCC" :background "#656555"))))
- '(term-default-fg-color ((t (:inherit term-color-white))))
+ '(term-color-yellow ((t (:foreground "#DFAF8F" :background "#9FC59F"))))
  '(term-default-bg-color ((t (:inherit term-color-black))))
- )
+ '(term-default-fg-color ((t (:inherit term-color-white)))))
+
+(load-theme 'tango-dark t)
 
 ;; custom *.el scripts
 ;; add your modules path
@@ -37,9 +40,9 @@
 ;; normal redo
 (define-key global-map (kbd "C-/") 'undo)
 (define-key global-map (kbd "C-_") 'undo)
-(define-key global-map (kbd "C-x C-/") 'redo)
+(define-key global-map (kbd "C-?") 'redo)
 ;; In terminal, C-x C-/ is interpreted as C-x C-_ Dont' know why yet.
-(define-key global-map (kbd "C-x C-_") 'redo)
+;; (define-key global-map (kbd "C-x C-_") 'redo)
 
 (require 'exec-path-from-shell)
 (when (memq window-system '(mac ns x))
@@ -70,6 +73,111 @@
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+;; prevent emacs from splitting windows automatically
+;; (set-frame-parameter nil 'unsplittable t)
+
+(defun split-window-sensibly-prefer-horizontal (&optional window)
+"Based on split-window-sensibly, but designed to prefer a horizontal split,
+i.e. windows tiled side-by-side."
+  (let ((window (or window (selected-window))))
+    (or (and (window-splittable-p window t)
+         ;; Split window horizontally
+         (with-selected-window window
+           (split-window-right)))
+    (and (window-splittable-p window)
+         ;; Split window vertically
+         (with-selected-window window
+           (split-window-below)))
+    (and
+         ;; If WINDOW is the only usable window on its frame (it is
+         ;; the only one or, not being the only one, all the other
+         ;; ones are dedicated) and is not the minibuffer window, try
+         ;; to split it horizontally disregarding the value of
+         ;; `split-height-threshold'.
+         (let ((frame (window-frame window)))
+           (or
+            (eq window (frame-root-window frame))
+            (catch 'done
+              (walk-window-tree (lambda (w)
+                                  (unless (or (eq w window)
+                                              (window-dedicated-p w))
+                                    (throw 'done nil)))
+                                frame)
+              t)))
+     (not (window-minibuffer-p window))
+     (let ((split-width-threshold 0))
+       (when (window-splittable-p window t)
+         (with-selected-window window
+           (split-window-right))))))))
+
+(defun split-window-really-sensibly (&optional window)
+  (let ((window (or window (selected-window))))
+    (if (> (window-total-width window) (* 2 (window-total-height window)))
+        (with-selected-window window (split-window-sensibly-prefer-horizontal window))
+      (with-selected-window window (split-window-sensibly window)))))
+
+(setq split-window-preferred-function #'my-split-window-sensibly)
+
+(setq
+   split-height-threshold nil
+   split-width-threshold 120
+   split-window-preferred-function 'split-window-really-sensibly)
+
+;; (setq
+;;  ;; Kill a frame when quitting its only window
+;;  frame-auto-hide-function 'delete-frame
+;;  ;; Maximum number of side-windows to create on (left top right bottom)
+;;  window-sides-slots '(0 1 1 1)
+;;  ;; Default rules
+;;  display-buffer-alist
+;;  `(;; Display *Help* buffer at the bottom-most slot
+;;    ("*\\(Help\\|trace-\\|Backtrace\\|RefTeX.*\\)"
+;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-in-side-window)
+;; 	(side . right)
+;; 	(slot . 0)
+;; 	(window-width . 0.33)
+;; 	(reusable-frames . visible))
+;;    ("^\\*info"
+;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-pop-up-frame)
+;; 	(pop-up-frame-parameters
+;; 	  (width . 80)
+;; 	  (left . 1.0)
+;; 	  (fullscreen . fullheight)))
+;;    ;; Open new edited messages in a right-hand frame
+;;    ;; For this to close the frame, add
+;;    ;; (add-hook 'wl-draft-kill-pre-hook 'quit-window)
+;;    ("\\(\\*draft\\*\\|Draft/\\)"
+;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-pop-up-frame)
+;; 	(pop-up-frame-parameters
+;; 	  (width . 80)
+;; 	  (left . 1.0)
+;; 	  (fullscreen . fullheight)))
+;;    ;; TeX output buffers to bottom, with 10 lines
+;;    ("^\\(TeX Output\\|TeX\\)"
+;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-in-side-window)
+;; 	(side . bottom)
+;; 	(slot . 0)
+;; 	(window-height . 10)
+;; 	(reusable-frames . visible))
+;;    ;; Display *BBDB* buffer on the bottom frame
+;;    ("*grep"
+;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-in-side-window)
+;; 	(side . bottom)
+;; 	(slot . 0)
+;; 	(window-height . 10)
+;; 	(reusable-frames . visible))
+;;    ;; Split shells at the bottom
+;;    ("^\\*[e]shell"
+;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-below-selected)
+;; 	(window-min-height . 20)
+;; 	(reusable-frames . visible)
+;; 	)
+;;    ))
+
+(add-hook 'prog-mode-hook 'electric-pair-mode)
+
+;; Disable gconf to change font behind the scene
+(define-key special-event-map [config-changed-event] 'ignore)
 
 (defun sudo-save ()
   (interactive)
@@ -118,6 +226,31 @@
             (message "gc-cons-threshold restored to %S"
                      gc-cons-threshold)))
 
+;; ====================================================================
+;; term configuration
+;; ====================================================================
+
+;; Explicitly use bash as in term shell
+(setq explicit-shell-file-name "/bin/bash")
+
+;; Remove the term buffer after closing it
+(defun my-term-exec-hook ()
+  (let* ((buff (current-buffer))
+         (proc (get-buffer-process buff)))
+    (set-process-sentinel
+     proc
+     `(lambda (process event)
+        (if (string= event "finished\n")
+            (kill-buffer ,buff))))))
+
+(add-hook 'term-exec-hook 'my-term-exec-hook)
+
+;; Copy stuffs to termx
+(eval-after-load "term"
+  '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
+
+(custom-set-variables '(term-char-mode-point-at-process-mark nil))
+
 ;; ================================================================================
 ;; Basic configurations
 ;; ================================================================================
@@ -138,12 +271,15 @@
 
 (global-set-key (kbd "C-c N") 'find-note)
 
+(setq org-todo-keywords
+  '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
 
 ;; Move around a bit faster
 (global-set-key (kbd "M-n") (kbd "C-u 10 C-n"))
 (global-set-key (kbd "M-p") (kbd "C-u 10 C-p"))
 
 ;; line wrap
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 (global-visual-line-mode 1)
 
 ;; Disable window decoration
@@ -183,15 +319,7 @@
   kept-old-versions 5    ; and how many of the old
   )
 
-;; match parens
-(defun match-paren (arg)
-  "Go to the matching paren if on a paren; otherwise insert %."
-  (interactive "p")
-  (cond ((looking-at "\\s(") (forward-list 1) (backward-char 1))
-        ((looking-at "\\s)") (forward-char 1) (backward-list 1))
-        (t (self-insert-command (or arg 1)))))
 
-(global-set-key "%" 'match-paren)
 
 ;; Often used commands
 (global-set-key (kbd "C-c b r") 'revert-buffer)
@@ -207,6 +335,10 @@
 ;; show matching parentheses
 (show-paren-mode 1)
 (setq show-paren-delay 0)
+
+;; move the focus to the newly create split
+(global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+(global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 
 ;; ================================================================================
 ;; Custom packages
@@ -352,7 +484,12 @@
 
 (use-package groovy-mode)
 (use-package yaml-mode)
-(use-package markdown-mode)
+(use-package markdown-mode
+  ;; Disable M-n and M-p to go to the next urls link because it is not useful
+  ;; and break the consistency file navigation
+  :bind (:map markdown-mode-map
+  ("M-n" . nil)
+  ("M-p" . nil)))
 
 (require 'ttcn3)
 (add-to-list 'auto-mode-alist '("\\.ttcn\\'" . ttcn-3-mode))
@@ -360,7 +497,10 @@
 (use-package elpy
   :ensure t
   :init
-  (elpy-enable))
+  (elpy-enable)
+  :config
+  ;; Disable auto-complete in python buffers
+  (setq ac-modes (delq 'python-mode ac-modes)))
 
 ;; auto-complete
   (use-package eglot
@@ -373,6 +513,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(custom-enabled-themes '(tango-dark))
+ '(electric-pair-mode t)
  '(package-selected-packages
    '(elpy xclip yasnippet-snippets yaml-mode writegood-mode which-key use-package undo-tree transpose-frame smartparens rainbow-mode rainbow-delimiters markdown-mode magit keyfreq ivy-prescient ivy-hydra groovy-mode goto-last-change git-gutter fzf expand-region eglot dumb-jump deadgrep counsel benchmark-init auto-complete))
  '(safe-local-variable-values
@@ -400,10 +544,4 @@
                 tags-file))))))
  '(show-paren-mode t)
  '(tool-bar-mode nil))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:height 100 :family "Go Mono")))))
+(put 'upcase-region 'disabled nil)
