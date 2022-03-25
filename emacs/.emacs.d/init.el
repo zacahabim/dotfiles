@@ -17,7 +17,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:height 100 :family "Go Mono"))))
+ '(default ((t (:inherit nil :extend nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 90 :width normal :foundry "    " :family "Go Mono"))))
  '(term-color-black ((t (:foreground "#3F3F3F" :background "#2B2B2B"))))
  '(term-color-blue ((t (:foreground "#7CB8BB" :background "#4C7073"))))
  '(term-color-cyan ((t (:foreground "#93E0E3" :background "#8CD0D3"))))
@@ -28,8 +28,6 @@
  '(term-color-yellow ((t (:foreground "#DFAF8F" :background "#9FC59F"))))
  '(term-default-bg-color ((t (:inherit term-color-black))))
  '(term-default-fg-color ((t (:inherit term-color-white)))))
-
-(load-theme 'tango-dark t)
 
 ;; custom *.el scripts
 ;; add your modules path
@@ -76,105 +74,16 @@
 ;; prevent emacs from splitting windows automatically
 ;; (set-frame-parameter nil 'unsplittable t)
 
-(defun split-window-sensibly-prefer-horizontal (&optional window)
-"Based on split-window-sensibly, but designed to prefer a horizontal split,
-i.e. windows tiled side-by-side."
-  (let ((window (or window (selected-window))))
-    (or (and (window-splittable-p window t)
-         ;; Split window horizontally
-         (with-selected-window window
-           (split-window-right)))
-    (and (window-splittable-p window)
-         ;; Split window vertically
-         (with-selected-window window
-           (split-window-below)))
-    (and
-         ;; If WINDOW is the only usable window on its frame (it is
-         ;; the only one or, not being the only one, all the other
-         ;; ones are dedicated) and is not the minibuffer window, try
-         ;; to split it horizontally disregarding the value of
-         ;; `split-height-threshold'.
-         (let ((frame (window-frame window)))
-           (or
-            (eq window (frame-root-window frame))
-            (catch 'done
-              (walk-window-tree (lambda (w)
-                                  (unless (or (eq w window)
-                                              (window-dedicated-p w))
-                                    (throw 'done nil)))
-                                frame)
-              t)))
-     (not (window-minibuffer-p window))
-     (let ((split-width-threshold 0))
-       (when (window-splittable-p window t)
-         (with-selected-window window
-           (split-window-right))))))))
-
-(defun split-window-really-sensibly (&optional window)
-  (let ((window (or window (selected-window))))
-    (if (> (window-total-width window) (* 2 (window-total-height window)))
-        (with-selected-window window (split-window-sensibly-prefer-horizontal window))
-      (with-selected-window window (split-window-sensibly window)))))
-
-(setq split-window-preferred-function #'my-split-window-sensibly)
-
-(setq
-   split-height-threshold nil
-   split-width-threshold 120
-   split-window-preferred-function 'split-window-really-sensibly)
-
-;; (setq
-;;  ;; Kill a frame when quitting its only window
-;;  frame-auto-hide-function 'delete-frame
-;;  ;; Maximum number of side-windows to create on (left top right bottom)
-;;  window-sides-slots '(0 1 1 1)
-;;  ;; Default rules
-;;  display-buffer-alist
-;;  `(;; Display *Help* buffer at the bottom-most slot
-;;    ("*\\(Help\\|trace-\\|Backtrace\\|RefTeX.*\\)"
-;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-in-side-window)
-;; 	(side . right)
-;; 	(slot . 0)
-;; 	(window-width . 0.33)
-;; 	(reusable-frames . visible))
-;;    ("^\\*info"
-;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-pop-up-frame)
-;; 	(pop-up-frame-parameters
-;; 	  (width . 80)
-;; 	  (left . 1.0)
-;; 	  (fullscreen . fullheight)))
-;;    ;; Open new edited messages in a right-hand frame
-;;    ;; For this to close the frame, add
-;;    ;; (add-hook 'wl-draft-kill-pre-hook 'quit-window)
-;;    ("\\(\\*draft\\*\\|Draft/\\)"
-;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-pop-up-frame)
-;; 	(pop-up-frame-parameters
-;; 	  (width . 80)
-;; 	  (left . 1.0)
-;; 	  (fullscreen . fullheight)))
-;;    ;; TeX output buffers to bottom, with 10 lines
-;;    ("^\\(TeX Output\\|TeX\\)"
-;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-in-side-window)
-;; 	(side . bottom)
-;; 	(slot . 0)
-;; 	(window-height . 10)
-;; 	(reusable-frames . visible))
-;;    ;; Display *BBDB* buffer on the bottom frame
-;;    ("*grep"
-;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-in-side-window)
-;; 	(side . bottom)
-;; 	(slot . 0)
-;; 	(window-height . 10)
-;; 	(reusable-frames . visible))
-;;    ;; Split shells at the bottom
-;;    ("^\\*[e]shell"
-;; 	(display-buffer-reuse-window display-buffer-in-previous-window display-buffer-below-selected)
-;; 	(window-min-height . 20)
-;; 	(reusable-frames . visible)
-;; 	)
-;;    ))
-
 (add-hook 'prog-mode-hook 'electric-pair-mode)
+
+(setq special-display-buffer-names
+      '("*compilation*" "*grep*"))
+
+(setq special-display-function
+      (lambda (buffer &optional args)
+        (split-window)
+        (switch-to-buffer buffer)
+        (get-buffer-window buffer 0)))
 
 ;; Disable gconf to change font behind the scene
 (define-key special-event-map [config-changed-event] 'ignore)
@@ -226,6 +135,15 @@ i.e. windows tiled side-by-side."
             (message "gc-cons-threshold restored to %S"
                      gc-cons-threshold)))
 
+;; Faster tramp
+(setq remote-file-name-inhibit-cache nil)
+(setq vc-ignore-dir-regexp
+      (format "%s\\|%s"
+                    vc-ignore-dir-regexp
+                    tramp-file-name-regexp))
+
+(setq tramp-verbose 1)
+
 ;; ====================================================================
 ;; term configuration
 ;; ====================================================================
@@ -249,7 +167,42 @@ i.e. windows tiled side-by-side."
 (eval-after-load "term"
   '(define-key term-raw-map (kbd "C-c C-y") 'term-paste))
 
-(custom-set-variables '(term-char-mode-point-at-process-mark nil))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(electric-pair-mode t)
+ '(package-selected-packages
+   '(elpy xclip yasnippet-snippets yaml-mode writegood-mode which-key use-package undo-tree transpose-frame smartparens rainbow-mode rainbow-delimiters markdown-mode magit keyfreq ivy-prescient ivy-hydra groovy-mode goto-last-change git-gutter fzf expand-region eglot dumb-jump deadgrep counsel benchmark-init auto-complete))
+ '(safe-local-variable-values
+   '((eval let
+           ((pwd
+             (file-truename default-directory)))
+           (while
+               (not
+                (file-exists-p
+                 (concat pwd dir-locals-file)))
+             (setq pwd
+                   (file-name-directory
+                    (directory-file-name pwd))))
+           (let
+               ((tags-file
+                 (concat pwd "out/TAGS."
+                         (car
+                          (split-string
+                           (symbol-name major-mode)
+                           "-")))))
+             (when
+                 (file-exists-p tags-file)
+               (set
+                (make-local-variable 'tags-file-name)
+                tags-file))))))
+ '(show-paren-mode t)
+ '(term-char-mode-point-at-process-mark nil)
+ '(tool-bar-mode nil))
 
 ;; ================================================================================
 ;; Basic configurations
@@ -275,8 +228,8 @@ i.e. windows tiled side-by-side."
   '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
 
 ;; Move around a bit faster
-(global-set-key (kbd "M-n") (kbd "C-u 10 C-n"))
-(global-set-key (kbd "M-p") (kbd "C-u 10 C-p"))
+(global-set-key (kbd "M-n") (kbd "C-u 4 C-n"))
+(global-set-key (kbd "M-p") (kbd "C-u 4 C-p"))
 
 ;; line wrap
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
@@ -340,6 +293,13 @@ i.e. windows tiled side-by-side."
 (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
 (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 
+;; Reuse window in other buffer
+(customize-set-variable
+ 'display-buffer-base-action
+ '((display-buffer-reuse-window display-buffer-same-window
+    display-buffer-in-previous-window
+    display-buffer-use-some-window)))
+
 ;; ================================================================================
 ;; Custom packages
 ;; ================================================================================
@@ -349,6 +309,8 @@ i.e. windows tiled side-by-side."
 ;;   ("C-c g f" . fzf-git)
 ;;   ("C-c f f" . fzf)
 ;; )
+
+(use-package string-inflection)
 
 ;; rg & projectile to search project
 (use-package deadgrep
@@ -462,7 +424,7 @@ i.e. windows tiled side-by-side."
 ;; Display line changes
 (use-package git-gutter
   :config
-  (global-git-gutter-mode 't))
+  (global-git-gutter-mode t))
 
 ;; ;; snippets
 ;; (use-package yasnippet
@@ -508,40 +470,5 @@ i.e. windows tiled side-by-side."
     :config
     (add-to-list 'eglot-server-programs '(elm-mode . ("elm-language-server" "--stdio"))))
 ;; ================================================================================
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(custom-enabled-themes '(tango-dark))
- '(electric-pair-mode t)
- '(package-selected-packages
-   '(elpy xclip yasnippet-snippets yaml-mode writegood-mode which-key use-package undo-tree transpose-frame smartparens rainbow-mode rainbow-delimiters markdown-mode magit keyfreq ivy-prescient ivy-hydra groovy-mode goto-last-change git-gutter fzf expand-region eglot dumb-jump deadgrep counsel benchmark-init auto-complete))
- '(safe-local-variable-values
-   '((eval let
-           ((pwd
-             (file-truename default-directory)))
-           (while
-               (not
-                (file-exists-p
-                 (concat pwd dir-locals-file)))
-             (setq pwd
-                   (file-name-directory
-                    (directory-file-name pwd))))
-           (let
-               ((tags-file
-                 (concat pwd "out/TAGS."
-                         (car
-                          (split-string
-                           (symbol-name major-mode)
-                           "-")))))
-             (when
-                 (file-exists-p tags-file)
-               (set
-                (make-local-variable 'tags-file-name)
-                tags-file))))))
- '(show-paren-mode t)
- '(tool-bar-mode nil))
+
 (put 'upcase-region 'disabled nil)
