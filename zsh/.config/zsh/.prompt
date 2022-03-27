@@ -1,0 +1,22 @@
+SYMBOL="❯"
+COLOR_USER=magenta
+COLOR_HOST=magenta
+COLOR_CURRENT_DIR=blue
+
+me() {
+    echo "%{$fg[$COLOR_USER]%}%n%{$reset_color%}@%{$fg[$COLOR_HOST]%}%m%{$reset_color%}"
+}
+
+current_dir() {
+    echo -n "%{$fg[$COLOR_CURRENT_DIR]%}%c%{$reset_color%}"
+}
+
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git svn
+zstyle ':vcs_info:git*' formats "(%b)"
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+
+autoload -U colors ; colors
+setopt promptsubst
+PROMPT='$(me):$(current_dir)${vcs_info_msg_0_} ${SYMBOL} '
