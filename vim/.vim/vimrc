@@ -10,6 +10,10 @@ set nocompatible
 let mapleader      = ' '
 let maplocalleader = ' '
 
+" Some indicator
+set listchars=nbsp:¬,tab:>-,extends:»,precedes:«,trail:•
+set list
+
 " longer timeout for <Leader> key
 set timeoutlen=8000
 
