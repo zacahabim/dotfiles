@@ -1,0 +1,35 @@
+# Guess the weather hourly
+[weather]
+command=curl -Ss 'https://wttr.in?0&T&Q' | cut -c 16- | head -2 | xargs echo
+interval=3600
+color=#A4C2F4
+
+# Hostname
+[ip]
+command=hostname -f | awk '{ print "hostname: " $1 }'
+interval=once
+color=#EDBAD8
+
+# Local IP
+[ip]
+command=ip -f inet addr show wlp2s0 | awk '/inet/ {print $2}' | awk '{ print "local IP: " $1 }'
+interval=once
+color=#FFD966
+
+# Tunnel IP
+[ip]
+command=ip -f inet addr show tun0 | awk '/inet/ {print $2}' | awk '{ print "tunnel IP: " $1 }'
+interval=once
+color=#91E78B
+
+# Update time every 5 seconds
+[date]
+command=date
+interval=1
+color=#CC99FF
+
+# Battery status
+[battery]
+command=$PWD/battery.sh
+interval=10
+color=#91E78B
