@@ -171,9 +171,9 @@ bindsym $mod+p mode "$mode_system"
 
 set $mode_display Display setup (1) laptop display only, (2) home display only, (3) work display only
 mode "$mode_display" {
-	bindsym 1 mode "default"; exec --no-startup-id "~/.screenlayout/only-laptop.sh"
-	bindsym 2 mode "default"; exec --no-startup-id "~/.screenlayout/home-one-screen.sh"
-	bindsym 3 mode "default"; exec --no-startup-id "~/.screenlayout/work-one-screen.sh"
+	bindsym 1 mode "default"; exec --no-startup-id "~/.screenlayout/1.sh"
+	bindsym 2 mode "default"; exec --no-startup-id "~/.screenlayout/2.sh"
+	bindsym 3 mode "default"; exec --no-startup-id "~/.screenlayout/3.sh"
 
     # back to normal: q, Enter or Escape
     bindsym q mode "default"
