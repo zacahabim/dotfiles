@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -euxo pipefail
+
+echo "Install stow..."
+brew install stow
+
+echo "Fetch all git submodules..."
+git submodule update --recursive --init
 
 rm -rf ~/.fzf
-
 cp -r submodules/fzf ~/.fzf
 ~/.fzf/install --all
 
 rm -rf ~/.vim
-rm ~/.tmux.conf
-stow --target=$HOME vim tmux xsession
+rm -f ~/.tmux.conf
+
+echo "stow --target=$HOME vim tmux"
+stow --target=$HOME vim nvim tmux
