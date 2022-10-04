@@ -244,3 +244,10 @@ noremap <silent> ,gf :GFiles <C-R><C-W><CR>
 "-------------------------------------------------------------------------------
 noremap <silent> <Leader>gs :Git<CR>
 noremap <silent> <Leader>gb :Gblame<CR>
+
+"-------------------------------------------------------------------------------
+" Neoformat
+"-------------------------------------------------------------------------------
+if has("nvim")
+    noremap <silent> <Leader>F :Neoformat prettier<CR>
+endif
