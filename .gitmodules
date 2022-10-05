@@ -28,3 +28,6 @@
 [submodule "submodules/neoformat"]
 	path = submodules/neoformat
 	url = https://github.com/sbdchd/neoformat
+[submodule "submodules/nvim-tree.lua"]
+	path = submodules/nvim-tree.lua
+	url = https://github.com/kyazdani42/nvim-tree.lua
