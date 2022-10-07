@@ -137,7 +137,7 @@ set statusline+=\ (%P)                            " percentage
 set nofoldenable
 
 " Set relative line number
-set rnu
+set rnu nu
 "-------------------------------------------------------------------------------
 " Color settings
 "-------------------------------------------------------------------------------
