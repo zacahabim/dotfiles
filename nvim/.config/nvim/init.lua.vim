@@ -1,10 +1,8 @@
 lua <<EOF
-
 -- disable netrw at the very start of your init.lua (strongly advised)
 vim.g.loaded = 1
 vim.g.loaded_netrwPlugin = 1
 
--- OR setup with some options
 require("nvim-tree").setup({
   sort_by = "case_sensitive",
   view = {
@@ -23,4 +21,14 @@ require("nvim-tree").setup({
   },
 })
 
+--mappings
+local function map(mode, lhs, rhs, opts)
+  local options = {noremap = true}
+  if opts then options = vim.tbl_extend('force', options, opts) end
+  vim.api.nvim_set_keymap(mode, lhs, rhs, options)
+end
+
+map('n', '<Leader>tt', ':NvimTreeFocus<CR>')
+map('n', '<Leader>tc', ':NvimTreeClose<CR>')
+map('n', '<Leader>tf', ':NvimTreeFindFileToggle<CR>')
 EOF
