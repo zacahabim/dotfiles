@@ -3,9 +3,8 @@
 set -euxo pipefail
 
 echo "Install stow..."
-brew install stow
-brew tap homebrew/cask-fonts
-brew install font-hack-nerd-font
+sudo apt-get update
+sudo apt-get install stow
 
 echo "Fetch all git submodules..."
 git submodule update --recursive --init
