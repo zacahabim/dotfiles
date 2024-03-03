@@ -25,12 +25,3 @@
 [submodule "submodules/seoul256.vim"]
 	path = submodules/seoul256.vim
 	url = https://github.com/junegunn/seoul256.vim.git
-[submodule "submodules/neoformat"]
-	path = submodules/neoformat
-	url = https://github.com/sbdchd/neoformat
-[submodule "submodules/nvim-tree.lua"]
-	path = submodules/nvim-tree.lua
-	url = https://github.com/kyazdani42/nvim-tree.lua
-[submodule "submodules/nvim-web-devicons"]
-	path = submodules/nvim-web-devicons
-	url = https://github.com/kyazdani42/nvim-web-devicons
