@@ -1,8 +1,11 @@
 -- Handle plugins with lazy.nvim
 require("core.lazy")
 
--- General Neovim keymaps
--- require("core.keymaps")
+-- Set keymaps
+require("core.keymaps")
 
--- Other options
+-- Set options
 require("core.options")
+
+-- Configure with vimscript
+require("core.vimscript")
