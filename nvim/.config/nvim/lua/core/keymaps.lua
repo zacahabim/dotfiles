@@ -21,3 +21,9 @@ map("n", "]b", ":bnext<CR>", "Next buffer")
 map("n", "[b", ":bprev<CR>", "Previous buffer")
 
 map("n", "<leader>hh", "<silent> :syntax sync fromstart<CR>", "Refresh syntax highlight")
+
+vim.api.nvim_create_user_command(
+    'GG',
+    "Ggrep <q-args>",
+    { nargs = "?" }
+)
