@@ -19,8 +19,12 @@ return {
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
-					"lua_ls",
-					"pylsp",
+					"ansiblels",
+					"bashls",
+					"gopls",
+					"helm_ls",
+					"pyright",
+					"yamlls",
 				},
 				automatic_installation = true,
 			})
@@ -65,23 +69,26 @@ return {
 			local on_attach = function(client, bufnr)
 				local lsp_map = require("helpers.keys").lsp_map
 
+				lsp_map("<leader>le", vim.diagnostic.open_float, bufnr, "Open diagnostics")
+				lsp_map("[d", vim.diagnostic.goto_prev, bufnr, "Goto Next diagnostics")
+				lsp_map("]d", vim.diagnostic.goto_next, bufnr, "Goto Prev diagnostics")
+				lsp_map("<leader>lq", vim.diagnostic.setloclist, bufnr, "Set location list")
 				lsp_map("<leader>lr", vim.lsp.buf.rename, bufnr, "Rename symbol")
 				lsp_map("<leader>la", vim.lsp.buf.code_action, bufnr, "Code action")
 				lsp_map("<leader>ld", vim.lsp.buf.type_definition, bufnr, "Type definition")
-				lsp_map("<leader>ls", require("telescope.builtin").lsp_document_symbols, bufnr, "Document symbols")
-
+				lsp_map("<leader>ls", vim.lsp.buf.document_symbol, bufnr, "Document symbols")
+				lsp_map("gr", vim.lsp.buf.references, bufnr, "Goto References")
 				lsp_map("gd", vim.lsp.buf.definition, bufnr, "Goto Definition")
-				lsp_map("gr", require("telescope.builtin").lsp_references, bufnr, "Goto References")
-				lsp_map("gI", vim.lsp.buf.implementation, bufnr, "Goto Implementation")
-				lsp_map("K", vim.lsp.buf.hover, bufnr, "Hover Documentation")
 				lsp_map("gD", vim.lsp.buf.declaration, bufnr, "Goto Declaration")
+				lsp_map("gi", vim.lsp.buf.implementation, bufnr, "Goto Implementation")
+				lsp_map("K", vim.lsp.buf.hover, bufnr, "Hover Documentation")
 
 				-- Create a command `:Format` local to the LSP buffer
 				vim.api.nvim_buf_create_user_command(bufnr, "Format", function(_)
 					vim.lsp.buf.format()
 				end, { desc = "Format current buffer with LSP" })
 
-				lsp_map("<leader>ff", "<cmd>Format<cr>", bufnr, "Format")
+				lsp_map("<leader>cf", "<cmd>Format<cr>", bufnr, "Format")
 
 				-- Attach and configure vim-illuminate
 				require("illuminate").on_attach(client)
@@ -112,36 +119,10 @@ return {
 					},
 				},
 			})
-
-			-- Python
-			require("lspconfig")["pylsp"].setup({
+			require("lspconfig")["pyright"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
-				settings = {
-					pylsp = {
-						plugins = {
-							flake8 = {
-								enabled = true,
-								maxLineLength = 88, -- Black's line length
-							},
-							-- Disable plugins overlapping with flake8
-							pycodestyle = {
-								enabled = false,
-							},
-							mccabe = {
-								enabled = false,
-							},
-							pyflakes = {
-								enabled = false,
-							},
-							-- Use Black as the formatter
-							autopep8 = {
-								enabled = false,
-							},
-						},
-					},
-				},
 			})
-		end,
+		end
 	},
 }
