@@ -17,6 +17,6 @@ end
 
 -- Uncomment the colorscheme to use
 -- local colorscheme = get_if_available("zellner")
-local colorscheme = get_if_available('rose-pine-dawn')
+local colorscheme = get_if_available('rose-pine')
 
 return colorscheme
