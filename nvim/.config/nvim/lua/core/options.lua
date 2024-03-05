@@ -1,7 +1,6 @@
 local opts = {
 	listchars = "nbsp:¬,tab:>-,extends:»,precedes:«,trail:•",
 	list = true,
-	-- timeoutlen = 8000,
 	encoding = "utf-8",
 	fileencoding = "utf-8",
 	fileformat= "unix",
@@ -12,12 +11,10 @@ local opts = {
 	hlsearch = true,
 	ignorecase = true,
 	smartcase = true,
-	nobackup = true,
+	modifiable = true,
+	backup = false,
 	writebackup = true,
-	noswapfile = true,
-	nobackup = true,
-	writebackup = true,
-	noswapfile = true,
+	swapfile = false,
 	expandtab = true,
 	autoindent = true,
 	smartindent = true,
@@ -31,7 +28,7 @@ local opts = {
 	relativenumber = true,
 	wildmenu = true,
 	wildmode = "longest:full,full",
-	colorcolumn = 80,
+	colorcolumn = "80",
 	laststatus = 2,
 	splitbelow = true,
 	splitright = true,
@@ -39,7 +36,7 @@ local opts = {
 
 -- Set options from table
 for opt, val in pairs(opts) do
-	vim.o[opt] = val
+	vim.api.nvim_set_option_value(opt, val, {})
 end
 
 -- Set other options
