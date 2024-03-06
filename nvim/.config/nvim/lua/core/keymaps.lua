@@ -12,7 +12,7 @@ map("n", "<leader>ut", function()
 	end
 end, "Toggle between light and dark themes")
 
--- Quickfix
+-- quickfix
 map("n", "]q", ":cnext<CR>", "Next global quickfix")
 map("n", "[q", ":cprev<CR>", "Previous global quickfix")
 map("n", "]l", ":lnext<CR>", "Next local quickfix")
@@ -21,6 +21,11 @@ map("n", "]b", ":bnext<CR>", "Next buffer")
 map("n", "[b", ":bprev<CR>", "Previous buffer")
 
 map("n", "<leader>hh", "<silent> :syntax sync fromstart<CR>", "Refresh syntax highlight")
+
+
+-- netrw
+map("n", "<leader>dd", ":Lexplore %:p:h<CR>", "Left explore current file")
+map("n", "<leader>da", ":Lexplore<CR>", "Left explore current working dir")
 
 vim.api.nvim_create_user_command(
     'GG',
