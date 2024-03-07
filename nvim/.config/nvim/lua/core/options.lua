@@ -33,10 +33,6 @@ local opts = {
 	splitbelow = true,
 	splitright = true,
 	background = "light",
-	netrw_preview = 1,
-	netrw_alto = 1,
-	netrw_liststyle = 3,
-	netrw_winsize = 30,
 }
 
 -- Set options from table
