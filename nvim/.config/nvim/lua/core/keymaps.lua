@@ -22,11 +22,5 @@ map("n", "[b", ":bprev<CR>", "Previous buffer")
 
 map("n", "<leader>hh", "<silent> :syntax sync fromstart<CR>", "Refresh syntax highlight")
 
--- neotree
-map("n", "-", "<cmd>Neotree<CR>", "Open neotree")
-
-vim.api.nvim_create_user_command(
-    'GG',
-    "Ggrep <q-args>",
-    { nargs = "?" }
-)
+-- neo-tree
+map("n", "-", ":Neotree<CR>", "Open Neo-tree")
