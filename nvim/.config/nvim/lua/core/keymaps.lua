@@ -22,10 +22,8 @@ map("n", "[b", ":bprev<CR>", "Previous buffer")
 
 map("n", "<leader>hh", "<silent> :syntax sync fromstart<CR>", "Refresh syntax highlight")
 
-
--- netrw
-map("n", "<leader>dd", ":Lexplore %:p:h<CR>", "Left explore current file")
-map("n", "<leader>da", ":Lexplore<CR>", "Left explore current working dir")
+-- neotree
+map("n", "-", "<cmd>Neotree<CR>", "Open neotree")
 
 vim.api.nvim_create_user_command(
     'GG',
