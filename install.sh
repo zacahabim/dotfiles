@@ -6,7 +6,7 @@
 
  if [ "$PLATFORM" = Linux ]; then
     sudo apt-get update
-    sudo apt-get install -y stow golang python3-pip python3.10-venv
+    sudo apt-get install -y stow golang python3-pip python3.10-venv ranger
     curl -fsSL https://deb.nodesource.com/setup_21.x | sudo -E bash - &&\
         sudo apt-get install -y nodejs
 
@@ -36,4 +36,4 @@
  rm -f ~/.tmux.conf
 
 echo "stow --target=$HOME vim tmux"
-stow --target=$HOME vim nvim tmux
+stow --target=$HOME vim nvim tmux ranger
