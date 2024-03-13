@@ -11,13 +11,14 @@
         sudo apt-get install -y nodejs
 
     mkdir --parent ~/.fonts
-
-    if [ ! -f ~/.fonts/Go-Mono.tar.xz ]; then
-     curl -L -o ~/.fonts/Go-Mono.tar.xz \
-         https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Go-Mono.tar.xz
-     tar xvf ~/.fonts/Go-Mono.tar.xz -C ~/.fonts/
-     sudo fc-cache -fv
-    fi
+    for font in Go-Mono.tar.xz ComicShannsMono.tar.xz ; do
+        if [ ! -f ~/.fonts/"${font}" ]; then
+            curl -L -o ~/.fonts/"${font}" \
+                https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/"${font}"
+            tar xvf ~/.fonts/"${font}" -C ~/.fonts/
+            sudo fc-cache -fv
+        fi
+    done
  elif [ "$PLATFORM" = Darwin ]; then
      brew install stow golang node python3
      pip3 install virtualenv
