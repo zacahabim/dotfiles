@@ -20,7 +20,14 @@ map("n", "[l", ":lprev<CR>", "Previous local quickfix")
 map("n", "]b", ":bnext<CR>", "Next buffer")
 map("n", "[b", ":bprev<CR>", "Previous buffer")
 
-map("n", "<leader>hh", "<silent> :syntax sync fromstart<CR>", "Refresh syntax highlight")
+-- reset syntax highlighting
+map("n", "<leader>hh", ":syntax sync fromstart<CR>", "Refresh syntax highlight")
 
--- neo-tree
+-- neotree
 map("n", "-", ":Neotree<CR>", "Open Neo-tree")
+
+-- fast moving
+map("n", "H", "10h", "Quick h")
+map("n", "J", "10j", "Quick j")
+map("n", "K", "10k", "Quick k")
+map("n", "L", "10l", "Quick l")
