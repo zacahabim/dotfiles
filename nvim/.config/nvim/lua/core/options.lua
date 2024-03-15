@@ -32,7 +32,7 @@ local opts = {
 	laststatus = 2,
 	splitbelow = true,
 	splitright = true,
-	background = "light",
+	background = "dark",
 }
 
 -- Set options from table
