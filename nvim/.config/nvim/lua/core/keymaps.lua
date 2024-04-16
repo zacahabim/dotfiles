@@ -31,3 +31,8 @@ map("n", "H", "10h", "Quick h")
 map("n", "J", "10j", "Quick j")
 map("n", "K", "10k", "Quick k")
 map("n", "L", "10l", "Quick l")
+
+map("v", "H", "10h", "Quick h")
+map("v", "J", "10j", "Quick j")
+map("v", "K", "10k", "Quick k")
+map("v", "L", "10l", "Quick l")

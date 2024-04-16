@@ -81,7 +81,7 @@ return {
 				lsp_map("gd", vim.lsp.buf.definition, bufnr, "Goto Definition")
 				lsp_map("gD", vim.lsp.buf.declaration, bufnr, "Goto Declaration")
 				lsp_map("gi", vim.lsp.buf.implementation, bufnr, "Goto Implementation")
-				lsp_map("K", vim.lsp.buf.hover, bufnr, "Hover Documentation")
+				lsp_map("gk", vim.lsp.buf.hover, bufnr, "Hover Documentation")
 
 				-- Create a command `:Format` local to the LSP buffer
 				vim.api.nvim_buf_create_user_command(bufnr, "Format", function(_)
