@@ -36,3 +36,12 @@ map("v", "H", "10h", "Quick h")
 map("v", "J", "10j", "Quick j")
 map("v", "K", "10k", "Quick k")
 map("v", "L", "10l", "Quick l")
+
+-- make
+map("n", "<F3>", ":make! | bot copen<CR>", "Run make")
+map("v", "<F3>", ":make! | bot copen<CR>", "Run make")
+
+-- grep
+map("n", "<F4>", ":Ggrep <C-r><C-w><CR>", "Git grep")
+map("v", "<F4>", ":Ggrep <C-r><C-w><CR>", "Git grep")
+
