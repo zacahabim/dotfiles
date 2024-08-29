@@ -59,3 +59,13 @@ let g:netrw_localrmdir='rm -r'
 hi! link netrwMarkFile Search
 let g:netrw_banner = 0
 ]], false)
+
+-- -- shell options
+-- vim.api.nvim_exec([[
+-- set shellcmdflag=-ic
+-- ]], false)
+
+-- pyindent
+vim.api.nvim_exec([[
+let g:pyindent_open_paren = 'shiftwidth()'
+]], false)
