@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 
  set -euxo pipefail
 
@@ -37,4 +37,4 @@
  rm -f ~/.tmux.conf
 
 echo "stow --target=$HOME vim tmux"
-stow --target=$HOME vim nvim tmux ranger
+stow --target=$HOME vim nvim tmux ranger git
