@@ -1,0 +1,8 @@
+[user]
+	email = hieu.nguyen@ericsson.com
+	name = Hieu Nguyen
+[include]
+      path = .gitalias.txt
+[core]
+	editor = vim
+
