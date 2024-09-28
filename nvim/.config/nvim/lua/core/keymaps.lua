@@ -44,4 +44,3 @@ map("v", "<F3>", ":make! | bot copen<CR>", "Run make")
 -- grep
 map("n", "<F4>", ":Ggrep <C-r><C-w><CR>", "Git grep")
 map("v", "<F4>", ":Ggrep <C-r><C-w><CR>", "Git grep")
-

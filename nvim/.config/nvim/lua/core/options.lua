@@ -32,14 +32,10 @@ local opts = {
 	laststatus = 2,
 	splitbelow = true,
 	splitright = true,
-	background = "dark",
+	background = 'light',
 }
 
 -- Set options from table
 for opt, val in pairs(opts) do
 	vim.api.nvim_set_option_value(opt, val, {})
 end
-
--- Set other options
-local colorscheme = require("helpers.colorscheme")
-vim.cmd.colorscheme(colorscheme)
