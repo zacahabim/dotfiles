@@ -1,3 +1,4 @@
 /*
 !/nvim/*
 !.gitignore
+/nvim/.config/nvim/lua/core/work.lua

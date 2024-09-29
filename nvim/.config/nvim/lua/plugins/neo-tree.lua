@@ -11,12 +11,22 @@ return {
     opts = {
         filesystem = {
             hijack_netrw_behavior = "open_default",
+            use_libuv_file_watcher = true,
             follow_current_file = {
             enabled = true, -- This will find and focus the file in the active buffer every time
             --               -- the current file is changed while the tree is open.
             leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
-          },
-            use_libuv_file_watcher = true,
+            },
+            filtered_items = {
+                visible = true,
+                hide_dotfiles = false,
+                hide_gitignored = true,
+            },
+        },
+        window = {
+            mappings = {
+                ["/"] = "noop",
+            },
         },
     },
 }
