@@ -4,18 +4,16 @@ return {
 		config = function()
 			local wk = require("which-key")
 			wk.setup()
-			wk.register(
+			wk.add(
 				{
-					["<leader>"] = {
-						f = { name = "File" },
-						d = { name = "Delete/Close" },
-						q = { name = "Quit" },
-						s = { name = "Search" },
-						l = { name = "LSP" },
-						u = { name = "UI" },
-						b = { name = "Debugging" },
-						g = { name = "Git" },
-					}
+					{"<leader>f" , group = "File" },
+					{"<leader>d" , group = "Delete/Close" },
+					{"<leader>q" , group = "Quit" },
+					{"<leader>s" , group = "Search" },
+					{"<leader>l" , group = "LSP" },
+					{"<leader>u" , group = "UI" },
+					{"<leader>b" , group = "Debugging" },
+					{"<leader>g" , group = "Git" },
 				}
 			)
 		end
