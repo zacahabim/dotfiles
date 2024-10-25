@@ -9,6 +9,9 @@ export SAVEHIST=10000                   # Maximum events in history file
 
 PATH="$HOME/.local/bin:$PATH"
 
+export NINESTUFFS="$HOME/.local/9stuffs"
+PATH="$NINESTUFFS/bin:$PATH"
+
 export PLAN9="$HOME/.local/plan9port"
 PATH="$PLAN9/bin:$PATH"
 export PATH
