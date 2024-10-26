@@ -23,7 +23,7 @@ local opts = {
 	softtabstop = 4,
 	scrolloff = 5,
 	wrap = true,
-	termguicolors = true,
+	termguicolors = false,
 	number = true,
 	relativenumber = true,
 	wildmenu = true,
@@ -32,7 +32,7 @@ local opts = {
 	laststatus = 2,
 	splitbelow = true,
 	splitright = true,
-	background = 'light',
+	background = 'dark',
 }
 
 -- Set options from table
