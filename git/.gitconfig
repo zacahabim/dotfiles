@@ -1,8 +1,7 @@
 [user]
-	email = hieu.nguyen@ericsson.com
+	email = tofunth@gmail.com
 	name = Hieu Nguyen
 [include]
       path = .gitalias.txt
 [core]
 	editor = vim
-
