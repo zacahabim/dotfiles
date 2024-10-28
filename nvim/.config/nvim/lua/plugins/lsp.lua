@@ -13,6 +13,7 @@ return {
 			"folke/neodev.nvim",
 			"RRethy/vim-illuminate",
 			"hrsh7th/cmp-nvim-lsp",
+			"stevearc/dressing.nvim",
 		},
 		config = function()
 			-- Set up Mason before anything else
