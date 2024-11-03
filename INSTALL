@@ -20,9 +20,9 @@
         fi
     done
  elif [ "$PLATFORM" = Darwin ]; then
-     brew install stow golang node python3
-     pip3 install virtualenv
-     brew tap homebrew/cask-fonts
+     brew install stow
+     # brew install golang node python3
+     # pip3 install virtualenv
      brew install font-hack-nerd-font
  fi
 
@@ -36,5 +36,4 @@
  rm -rf ~/.vim
  rm -f ~/.tmux.conf
 
-echo "stow --target=$HOME vim tmux"
 stow --target=$HOME vim nvim tmux ranger git
