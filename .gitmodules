@@ -28,3 +28,15 @@
 [submodule "submodules/nerdtree"]
 	path = submodules/nerdtree
 	url = https://github.com/preservim/nerdtree.git
+[submodule "submodules/vim-eunuch"]
+	path = submodules/vim-eunuch
+	url = https://github.com/tpope/vim-eunuch.git
+[submodule "submodules/vim-repeat"]
+	path = submodules/vim-repeat
+	url = https://github.com/tpope/vim-repeat.git
+[submodule "submodules/vim-lsp"]
+	path = submodules/vim-lsp
+	url = https://github.com/prabirshrestha/vim-lsp.git
+[submodule "submodules/vim-lsp-settings"]
+	path = submodules/vim-lsp-settings
+	url = https://github.com/mattn/vim-lsp-settings.git
