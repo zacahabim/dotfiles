@@ -35,11 +35,11 @@ runtime macros/matchit.vim
 " enable mouse rolling
 if has("mouse")
     set mouse=a
-	if has("mouse_sgr")
-		set ttymouse=sgr
+    if has("mouse_sgr")
+        set ttymouse=sgr
     elseif !has("nvim")
-		set ttymouse=xterm2
-	end
+        set ttymouse=xterm2
+    end
 endif
 
 if has("gui")
@@ -191,11 +191,11 @@ set tags=./tags;/
 "-------------------------------------------------------------------------------
 " BASIC KEY BINDINGS
 "-------------------------------------------------------------------------------
-" better splitting motion
-nnoremap <C-h> <C-W>h
-nnoremap <C-j> <C-W>j
-nnoremap <C-k> <C-W>k
-nnoremap <C-l> <C-W>l
+" Move faster
+nnoremap H 10h
+nnoremap J 10j
+nnoremap K 10k
+nnoremap L 10l
 
 " convenient macro-ing
 nnoremap Q @q
@@ -270,6 +270,14 @@ if executable('pylsp')
         \ })
 endif
 
+if executable('groovy-language-server')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'groovy-language-server',
+        \ 'cmd': {server_info->['groovy-language-server']},
+        \ 'allowlist': ['groovy'],
+        \ })
+endif
+
 function! s:on_lsp_buffer_enabled() abort
     setlocal omnifunc=lsp#complete
     setlocal signcolumn=yes
@@ -284,11 +292,11 @@ function! s:on_lsp_buffer_enabled() abort
     nmap <buffer> [g <plug>(lsp-previous-diagnostic)
     nmap <buffer> ]g <plug>(lsp-next-diagnostic)
     nmap <buffer> K <plug>(lsp-hover)
-    nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
-    nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
+    " nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    " nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
     let g:lsp_diagnostics_echo_cursor = 1
     let g:lsp_format_sync_timeout = 1000
-    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
+    autocmd! BufWritePre *.go,*.py,*.groovy call execute('LspDocumentFormatSync')
 
     " refer to doc to add more commands
 endfunction
