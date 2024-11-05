@@ -192,6 +192,26 @@
 
   # log with one line per item.
   lo = log --oneline
+  lo1 = log --oneline --reverse -1
+  lo2 = log --oneline --reverse -2
+  lo3 = log --oneline --reverse -3
+  lo4 = log --oneline --reverse -4
+  lo5 = log --oneline --reverse -5
+  lo6 = log --oneline --reverse -6
+  lo7 = log --oneline --reverse -7
+  lo8 = log --oneline --reverse -8
+  lo9 = log --oneline --reverse -9
+  lo10 = log --oneline --reverse -10
+  lo11 = log --oneline --reverse -11
+  lo12 = log --oneline --reverse -12
+  lo13 = log --oneline --reverse -13
+  lo14 = log --oneline --reverse -14
+  lo15 = log --oneline --reverse -15
+  lo16 = log --oneline --reverse -16
+  lo17 = log --oneline --reverse -17
+  lo18 = log --oneline --reverse -18
+  lo19 = log --oneline --reverse -19
+  lo20 = log --oneline --reverse -20
 
   # log with patch generation.
   lp = log --patch
@@ -342,6 +362,7 @@
   #     5dae0a0 - whatever
   #
   rbi = rebase --interactive @{upstream}
+  rba = rebase --interactive --autosquash origin/HEAD
 
   # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
   # This is a slightly modified version
@@ -913,6 +934,9 @@
   #
   get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
   put = !git commit --all && git push
+
+  fere = !git fetch && git rebase origin/master
+  puhe = !git push origin HEAD:refs/for/master
 
   # Do everything we can to make the local repo like the master branch.
   #
