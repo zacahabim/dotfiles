@@ -1,42 +1,42 @@
 [submodule "submodules/vim-surround"]
-	path = submodules/vim-surround
+	path = vim/.vim/pack/plugins/start/vim-surround
 	url = https://github.com/tpope/vim-surround
 [submodule "submodules/vim-commentary"]
-	path = submodules/vim-commentary
+	path = vim/.vim/pack/plugins/start/vim-commentary
 	url = https://github.com/tpope/vim-commentary
 [submodule "submodules/vim-fugitive"]
-	path = submodules/vim-fugitive
+	path = vim/.vim/pack/plugins/start/vim-fugitive
 	url = https://github.com/tpope/vim-fugitive.git
 [submodule "submodules/vim-polyglot"]
-	path = submodules/vim-polyglot
+	path = vim/.vim/pack/plugins/start/vim-polyglot
 	url = https://github.com/sheerun/vim-polyglot.git
 [submodule "submodules/tabular"]
-	path = submodules/tabular
+	path = vim/.vim/pack/plugins/start/tabular
 	url = https://github.com/godlygeek/tabular.git
 [submodule "submodules/fzf.vim"]
-	path = submodules/fzf.vim
+	path = vim/.vim/pack/plugins/start/fzf.vim
 	url = https://github.com/junegunn/fzf.vim.git
 [submodule "submodules/fzf"]
 	path = submodules/fzf
 	url = https://github.com/junegunn/fzf.git
 [submodule "submodules/vim-vinegar"]
-	path = submodules/vim-vinegar
+	path = vim/.vim/pack/plugins/start/vim-vinegar
 	url = https://github.com/tpope/vim-vinegar.git
 [submodule "submodules/seoul256.vim"]
-	path = submodules/seoul256.vim
+	path = vim/.vim/pack/plugins/start/seoul256.vim
 	url = https://github.com/junegunn/seoul256.vim.git
 [submodule "submodules/nerdtree"]
 	path = submodules/nerdtree
 	url = https://github.com/preservim/nerdtree.git
 [submodule "submodules/vim-eunuch"]
-	path = submodules/vim-eunuch
+	path = vim/.vim/pack/plugins/start/vim-eunuch
 	url = https://github.com/tpope/vim-eunuch.git
 [submodule "submodules/vim-repeat"]
-	path = submodules/vim-repeat
+	path = vim/.vim/pack/plugins/start/vim-repeat
 	url = https://github.com/tpope/vim-repeat.git
 [submodule "submodules/vim-lsp"]
-	path = submodules/vim-lsp
+	path = vim/.vim/pack/plugins/start/vim-lsp
 	url = https://github.com/prabirshrestha/vim-lsp.git
 [submodule "submodules/vim-lsp-settings"]
-	path = submodules/vim-lsp-settings
+	path = vim/.vim/pack/plugins/start/vim-lsp-settings
 	url = https://github.com/mattn/vim-lsp-settings.git
