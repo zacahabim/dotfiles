@@ -197,8 +197,10 @@ nnoremap J 10j
 nnoremap K 10k
 nnoremap L 10l
 
-" convenient macro-ing
-nnoremap Q @q
+vnoremap H 10h
+vnoremap J 10j
+vnoremap K 10k
+vnoremap L 10l
 
 " Quickfix
 nnoremap ]q :cnext<CR>
@@ -306,3 +308,10 @@ augroup lsp_install
     " call s:on_lsp_buffer_enabled only for languages that has the server registered.
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
 augroup END
+
+"-------------------------------------------------------------------------------
+" Work stuffs
+"-------------------------------------------------------------------------------
+if (filereadable(expand("$HOME/.vimrc.work")))
+    execute "source $HOME/.vimrc.work"
+endif
