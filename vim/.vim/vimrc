@@ -264,21 +264,21 @@ nnoremap <leader>nf :NERDTreeFind<CR>
 "-------------------------------------------------------------------------------
 " LSP stuffs
 "-------------------------------------------------------------------------------
-if executable('pylsp')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'pylsp',
-        \ 'cmd': {server_info->['pylsp']},
-        \ 'allowlist': ['python'],
-        \ })
-endif
+" if executable('pylsp')
+"     au User lsp_setup call lsp#register_server({
+"         \ 'name': 'pylsp',
+"         \ 'cmd': {server_info->['pylsp']},
+"         \ 'allowlist': ['python'],
+"         \ })
+" endif
 
-if executable('groovy-language-server')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'groovy-language-server',
-        \ 'cmd': {server_info->['groovy-language-server']},
-        \ 'allowlist': ['groovy'],
-        \ })
-endif
+" if executable('groovy-language-server')
+"     au User lsp_setup call lsp#register_server({
+"         \ 'name': 'groovy-language-server',
+"         \ 'cmd': {server_info->['groovy-language-server']},
+"         \ 'allowlist': ['groovy'],
+"         \ })
+" endif
 
 function! s:on_lsp_buffer_enabled() abort
     setlocal omnifunc=lsp#complete
@@ -294,8 +294,8 @@ function! s:on_lsp_buffer_enabled() abort
     nmap <buffer> [g <plug>(lsp-previous-diagnostic)
     nmap <buffer> ]g <plug>(lsp-next-diagnostic)
     nmap <buffer> K <plug>(lsp-hover)
-    " nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
-    " nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
+    nnoremap <buffer> <expr><c-k> lsp#scroll(+4)
+    nnoremap <buffer> <expr><c-j> lsp#scroll(-4)
     let g:lsp_diagnostics_echo_cursor = 1
     let g:lsp_format_sync_timeout = 1000
     autocmd! BufWritePre *.go,*.py,*.groovy call execute('LspDocumentFormatSync')
@@ -308,6 +308,13 @@ augroup lsp_install
     " call s:on_lsp_buffer_enabled only for languages that has the server registered.
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
 augroup END
+
+"-------------------------------------------------------------------------------
+" Autocomplete
+"-------------------------------------------------------------------------------
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 
 "-------------------------------------------------------------------------------
 " Work stuffs
