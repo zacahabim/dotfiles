@@ -26,7 +26,7 @@
 	path = vim/.vim/pack/plugins/start/seoul256.vim
 	url = https://github.com/junegunn/seoul256.vim.git
 [submodule "submodules/nerdtree"]
-	path = submodules/nerdtree
+	path = vim/.vim/pack/plugins/start/nerdtree
 	url = https://github.com/preservim/nerdtree.git
 [submodule "submodules/vim-eunuch"]
 	path = vim/.vim/pack/plugins/start/vim-eunuch
