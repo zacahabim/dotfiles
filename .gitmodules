@@ -46,3 +46,9 @@
 [submodule "vim/.vim/pack/plugins/start/asyncomplete-lsp.vim"]
 	path = vim/.vim/pack/plugins/start/asyncomplete-lsp.vim
 	url = https://github.com/prabirshrestha/asyncomplete-lsp.vim.git
+[submodule "vim/.vim/pack/plugins/start/nerdtree_choosewin-plugin"]
+	path = vim/.vim/pack/plugins/start/nerdtree_choosewin-plugin
+	url = https://github.com/weilbith/nerdtree_choosewin-plugin.git
+[submodule "vim/.vim/pack/plugins/start/vim-choosewin"]
+	path = vim/.vim/pack/plugins/start/vim-choosewin
+	url = https://github.com/t9md/vim-choosewin.git
