@@ -29,7 +29,7 @@ function! ChooseWinOpen(node) abort
 
   else
     " Require user input.
-    let l:winnr =  input('Window number to open the file: ') 
+    let l:winnr =  input('Window number to open the file: ')
 
     " Convert the window number to a window id if it exists.
     windo if winnr() ==? l:winnr | let l:winid = win_getid() | endif
@@ -50,6 +50,8 @@ function! ChooseWinOpen(node) abort
   endif
 
   " Jump back to the NERDTree window and continue to open the file.
-  call win_gotoid(l:nerdwindow) 
-  call a:node.activate({'reuse': 'all', 'where': 'p'})
+  call win_gotoid(l:nerdwindow)
+  " Follow the fix here to have the keepopen behavior
+  " https://github.com/preservim/nerdtree/pull/1217/commits/69bc630ce1d8d5dbd9b880d0602b1a027ff18e58
+  call a:node.activate({'reuse': 'all', 'where': 'p', 'keepopen': !nerdtree#closeTreeOnOpen()})
 endfunction
