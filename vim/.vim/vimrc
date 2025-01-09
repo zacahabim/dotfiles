@@ -208,6 +208,12 @@ nnoremap [q :cprev<CR>
 nnoremap ]l :lnext<CR>
 nnoremap [l :lprev<CR>
 
+augroup quickfix
+    autocmd!
+    autocmd QuickFixCmdPost [^l]* botright cwindow
+    autocmd QuickFixCmdPost l* botright lwindow
+augroup END
+
 " Buffer stuffs
 nnoremap ]b :bnext<CR>
 nnoremap [b :bprev<CR>
