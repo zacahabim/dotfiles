@@ -23,7 +23,7 @@ local opts = {
 	softtabstop = 4,
 	scrolloff = 5,
 	wrap = true,
-	termguicolors = false,
+	termguicolors = true,
 	number = true,
 	relativenumber = true,
 	wildmenu = true,
@@ -39,3 +39,16 @@ local opts = {
 for opt, val in pairs(opts) do
 	vim.api.nvim_set_option_value(opt, val, {})
 end
+
+-- Force to use OSC 52 provider for clipboard
+vim.g.clipboard = {
+  name = 'OSC 52',
+  copy = {
+    ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+    ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+  },
+  paste = {
+    ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+    ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+  },
+}
