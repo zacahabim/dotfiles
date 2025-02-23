@@ -14,6 +14,9 @@ config.window_background_opacity = 1.0
 config.text_background_opacity = 1.0
 config.warn_about_missing_glyphs = false
 config.enable_scroll_bar = true
+config.send_composed_key_when_left_alt_is_pressed = false
+config.send_composed_key_when_right_alt_is_pressed = true
+config.enable_kitty_keyboard = true
 config.keys = {
   {
     key = '_',
@@ -23,6 +26,31 @@ config.keys = {
   {
     key = 'Enter',
     mods = 'ALT',
+    action = wezterm.action.DisableDefaultAssignment,
+  },
+  {
+    key = 'Enter',
+    mods = 'OPT',
+    action = wezterm.action.DisableDefaultAssignment,
+  },
+  {
+    key = 'Enter',
+    mods = 'META',
+    action = wezterm.action.DisableDefaultAssignment,
+  },
+  {
+    key = 'Enter',
+    mods = 'ALT | SHIFT',
+    action = wezterm.action.DisableDefaultAssignment,
+  },
+  {
+    key = 'Enter',
+    mods = 'OPT | SHIFT',
+    action = wezterm.action.DisableDefaultAssignment,
+  },
+  {
+    key = 'Enter',
+    mods = 'META | SHIFT',
     action = wezterm.action.DisableDefaultAssignment,
   },
   {
