@@ -24,8 +24,11 @@ config.enable_kitty_keyboard = true
 config.window_padding = {
   bottom = 0,
 }
+config.scrollback_lines = 100000
 
 config.tab_bar_at_bottom = true
+config.use_fancy_tab_bar = true
+config.pane_focus_follows_mouse = true
 
 config.leader = { key = 'ö', mods = 'CTRL', timeout_milliseconds = 5000 }
 
@@ -71,6 +74,14 @@ config.keys = {
       end),
     },
   },
+  -- move pane to new tab
+  {
+    key = '!',
+    mods = 'LEADER',
+    action = wezterm.action_callback(function(win, pane)
+      local tab, window = pane:move_to_new_tab()
+    end),
+  },
   -- tab navigation
   {key="t", mods="LEADER", action=act{ActivateTabRelative=1}},
   {key="T", mods="LEADER", action=act{ActivateTabRelative=-1}},
@@ -78,6 +89,16 @@ config.keys = {
     key = 'z',
     mods = 'LEADER',
     action = act.TogglePaneZoomState,
+  },
+  {
+    key = '&',
+    mods = 'LEADER',
+    action = act.CloseCurrentTab{ confirm = true },
+  },
+  {
+    key = 'c',
+    mods = 'LEADER',
+    action = act.SpawnTab('DefaultDomain')
   },
   -- pane navigation
   {
@@ -99,6 +120,11 @@ config.keys = {
       key = 'RightArrow',
       mods = 'LEADER',
       action = act.ActivatePaneDirection 'Right',
+  },
+  {
+    key = 'Space',
+    mods = 'LEADER',
+    action = act.RotatePanes 'CounterClockwise',
   },
   -- disable default keybindings
   {
@@ -163,11 +189,6 @@ config.keys = {
   },
   {
     key = 'p',
-    mods = 'CMD',
-    action = act.DisableDefaultAssignment,
-  },
-  {
-    key = 'f',
     mods = 'CMD',
     action = act.DisableDefaultAssignment,
   },
