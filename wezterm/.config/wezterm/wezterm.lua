@@ -44,6 +44,22 @@ config.keys = {
     key    = "%",
     action = act.SplitHorizontal { domain = 'CurrentPaneDomain' }
   },
+  {
+    mods   = "LEADER",
+    key    = "|",
+    action = act.SplitPane {
+      direction = 'Right',
+      top_level = true,
+    }
+  },
+  {
+    mods   = "LEADER",
+    key    = "_",
+    action = act.SplitPane {
+      direction = 'Down',
+      top_level = true,
+    }
+  },
   -- reorder
   {
     mods = "LEADER",
