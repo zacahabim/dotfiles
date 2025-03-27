@@ -8,6 +8,13 @@ local config = wezterm.config_builder()
 
 local act = wezterm.action
 
+-- session manager
+
+local session_manager = require("wezterm-session-manager/session-manager")
+wezterm.on("save_session", function(window) session_manager.save_state(window) end)
+wezterm.on("load_session", function(window) session_manager.load_state(window) end)
+wezterm.on("restore_session", function(window) session_manager.restore_state(window) end)
+
 -- This is where you actually apply your config choices
 
 -- For example, changing the color scheme:
@@ -20,7 +27,11 @@ config.warn_about_missing_glyphs = false
 config.enable_scroll_bar = true
 config.send_composed_key_when_left_alt_is_pressed = false
 config.send_composed_key_when_right_alt_is_pressed = true
-config.enable_kitty_keyboard = true
+
+config.enable_kitty_keyboard = false
+config.term = "xterm-256color"
+config.hide_tab_bar_if_only_one_tab = true
+
 config.window_padding = {
   bottom = 0,
 }
@@ -31,8 +42,53 @@ config.use_fancy_tab_bar = true
 config.pane_focus_follows_mouse = true
 
 config.leader = { key = 'ö', mods = 'CTRL', timeout_milliseconds = 5000 }
+config.unix_domains = {
+  {
+    name = 'unix',
+  },
+}
 
 config.keys = {
+  -- mux
+  --session manager
+  {key = "S", mods = "LEADER", action = wezterm.action{EmitEvent = "save_session"}},
+  {key = "L", mods = "LEADER", action = wezterm.action{EmitEvent = "load_session"}},
+  {key = "R", mods = "LEADER", action = wezterm.action{EmitEvent = "restore_session"}},
+  -- Attach to muxer
+  {
+    key = 'a',
+    mods = 'LEADER',
+    action = act.AttachDomain 'unix',
+  },
+  -- Detach from muxer
+  {
+    key = 'd',
+    mods = 'LEADER',
+    action = act.DetachDomain { DomainName = 'unix' },
+  },
+  {
+    key = '$',
+    mods = 'LEADER',
+    action = act.PromptInputLine {
+      description = 'Enter new name for session',
+      action = wezterm.action_callback(
+        function(window, pane, line)
+          if line then
+            mux.rename_workspace(
+              window:mux_window():get_workspace(),
+              line
+            )
+          end
+        end
+      ),
+    },
+  },
+  -- Show list of workspaces
+  {
+    key = 's',
+    mods = 'LEADER',
+    action = act.ShowLauncherArgs { flags = 'WORKSPACES' },
+  },
   -- splitting
   {
     mods   = "LEADER",
@@ -50,6 +106,7 @@ config.keys = {
     action = act.SplitPane {
       direction = 'Right',
       top_level = true,
+      size = { Percent = 50 },
     }
   },
   {
@@ -58,6 +115,7 @@ config.keys = {
     action = act.SplitPane {
       direction = 'Down',
       top_level = true,
+      size = { Percent = 50 },
     }
   },
   -- reorder
