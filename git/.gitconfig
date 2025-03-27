@@ -4,4 +4,4 @@
 [include]
       path = .gitalias.txt
 [core]
-	editor = emacs -nw
+	editor = vim
