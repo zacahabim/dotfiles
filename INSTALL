@@ -14,7 +14,7 @@ if [ "$PLATFORM" = Linux ]; then
    for font in JetBrainsMono.tar.xz ; do
        if [ ! -f ~/.fonts/"${font}" ]; then
            curl -L -o ~/.fonts/"${font}" \
-               https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/"${font}"
+               https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/"${font}"
            tar xvf ~/.fonts/"${font}" -C ~/.fonts/
            sudo fc-cache -fv
        fi
@@ -35,8 +35,5 @@ cp -r submodules/fzf ~/.fzf
 
 rm -rf ~/.vim
 rm -f ~/.tmux.conf
-
-# install session manager
-git clone https://github.com/danielcopper/wezterm-session-manager.git ~/.config/wezterm/wezterm-session-manager
 
 stow --target=$HOME vim nvim tmux ranger git wezterm
