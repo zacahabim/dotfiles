@@ -1,0 +1,20 @@
+{
+    "editor.fontSize": 14,
+    "editor.fontFamily": "JetBrains Mono",
+    "editor.fontLigatures": true,
+    "workbench.preferredDarkColorTheme": "Monokai",
+    "python.analysis.autoImportCompletions": true,
+    "editor.minimap.enabled": false,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.autoFormatStrings": true,
+    "workbench.editor.showTabs": "single",
+    "workbench.editor.enablePreview": false,
+    "terminal.integrated.fontSize": 13,
+    "editor.rulers": [
+        80
+    ],
+    "gitlens.integrations.enabled": true,
+    "workbench.colorTheme": "Monokai",
+    "workbench.editor.navigationScope": "editorGroup"
+}
+
