@@ -11,7 +11,7 @@ local act = wezterm.action
 -- This is where you actually apply your config choices
 
 -- For example, changing the color scheme:
-config.color_scheme = 'AdventureTime'
+config.color_scheme = 'GitHub Dark'
 config.font = wezterm.font 'JetBrains Mono'
 config.font_size = 14
 config.window_background_opacity = 1.0
