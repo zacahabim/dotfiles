@@ -937,6 +937,8 @@
 
   fere = !git fetch && git rebase origin/master
   puhe = !git push origin HEAD:refs/for/master
+  fema = !git fetch && git rebase origin/main
+  puma = !git push origin main
 
   # Do everything we can to make the local repo like the master branch.
   #
