@@ -27,15 +27,15 @@ map("n", "<leader>hh", ":syntax sync fromstart<CR>", "Refresh syntax highlight")
 map("n", "-", ":Neotree<CR>", "Open Neo-tree")
 
 -- fast moving
-map("n", "H", "10h", "Quick h")
-map("n", "J", "10j", "Quick j")
-map("n", "K", "10k", "Quick k")
-map("n", "L", "10l", "Quick l")
+map("n", "H", "5", "Quick h")
+map("n", "J", "5", "Quick j")
+map("n", "K", "5", "Quick k")
+map("n", "L", "5", "Quick l")
 
-map("v", "H", "10h", "Quick h")
-map("v", "J", "10j", "Quick j")
-map("v", "K", "10k", "Quick k")
-map("v", "L", "10l", "Quick l")
+map("v", "H", "5", "Quick h")
+map("v", "J", "5", "Quick j")
+map("v", "K", "5", "Quick k")
+map("v", "L", "5", "Quick l")
 
 -- make
 map("n", "<F3>", ":make! | bot copen<CR>", "Run make")
