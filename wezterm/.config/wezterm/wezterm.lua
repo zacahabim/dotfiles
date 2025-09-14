@@ -13,7 +13,14 @@ local act = wezterm.action
 -- For example, changing the color scheme:
 config.color_scheme = 'Atom'
 config.font = wezterm.font 'JetBrains Mono'
-config.font_size = 14
+
+if wezterm.target_triple == 'x86_64-apple-darwin' or
+   wezterm.target_triple == 'arch64-apple-darwin' then
+  config.font_size = 14
+else
+  config.font_size = 11
+end
+
 config.window_background_opacity = 1.0
 config.text_background_opacity = 1.0
 config.warn_about_missing_glyphs = false
