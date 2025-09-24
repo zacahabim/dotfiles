@@ -54,3 +54,4 @@ vim.g.clipboard = {
 }
 
 vim.cmd("colorscheme carbonfox")
+

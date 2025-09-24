@@ -27,15 +27,15 @@ map("n", "<leader>hh", ":syntax sync fromstart<CR>", "Refresh syntax highlight")
 map("n", "-", ":Neotree<CR>", "Open Neo-tree")
 
 -- fast moving
-map("n", "H", "5", "Quick h")
-map("n", "J", "5", "Quick j")
-map("n", "K", "5", "Quick k")
-map("n", "L", "5", "Quick l")
+map("n", "H", "5h", "Quick h")
+map("n", "J", "5j", "Quick j")
+map("n", "K", "5k", "Quick k")
+map("n", "L", "5l", "Quick l")
 
-map("v", "H", "5", "Quick h")
-map("v", "J", "5", "Quick j")
-map("v", "K", "5", "Quick k")
-map("v", "L", "5", "Quick l")
+map("v", "H", "5h", "Quick h")
+map("v", "J", "5j", "Quick j")
+map("v", "K", "5k", "Quick k")
+map("v", "L", "5l", "Quick l")
 
 -- make
 map("n", "<F3>", ":make! | bot copen<CR>", "Run make")
@@ -44,3 +44,7 @@ map("v", "<F3>", ":make! | bot copen<CR>", "Run make")
 -- grep
 map("n", "<F4>", ":Ggrep <C-r><C-w><CR>", "Git grep")
 map("v", "<F4>", ":Ggrep <C-r><C-w><CR>", "Git grep")
+
+-- neo-tree
+map('n', '<leader>nn', ':Neotree toggle<CR>', 'Toggle neo-tree')
+map('v', '<leader>nn', ':Neotree toggle<CR>', 'Toggle neo-tree')

@@ -28,6 +28,12 @@ return {
 					"yamlls",
 				},
 				automatic_installation = true,
+				sources = {
+				  "nvim_lsp",
+				  "luasnip",
+				},
+				automatic_enable = false,
+				handlers = {},
 			})
 
 			-- Quick access via keymap
