@@ -15,7 +15,7 @@ config.color_scheme = 'Atom'
 config.font = wezterm.font 'JetBrains Mono'
 
 if wezterm.target_triple == 'x86_64-apple-darwin' or
-   wezterm.target_triple == 'arch64-apple-darwin' then
+   wezterm.target_triple == 'aarch64-apple-darwin' then
   config.font_size = 14
 else
   config.font_size = 11
