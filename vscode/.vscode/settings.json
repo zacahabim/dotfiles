@@ -2,7 +2,7 @@
     "editor.fontSize": 14,
     "editor.fontFamily": "JetBrains Mono",
     "editor.fontLigatures": true,
-    "workbench.preferredDarkColorTheme": "Monokai",
+    "workbench.preferredDarkColorTheme": "Atom One Dark",
     "python.analysis.autoImportCompletions": true,
     "editor.minimap.enabled": false,
     "python.analysis.completeFunctionParens": true,
@@ -14,7 +14,7 @@
         80
     ],
     "gitlens.integrations.enabled": true,
-    "workbench.colorTheme": "Monokai",
-    "workbench.editor.navigationScope": "editorGroup"
+    "workbench.colorTheme": "Atom One Dark",
+    "workbench.editor.navigationScope": "editorGroup",
+    "workbench.sideBar.location": "right"
 }
-

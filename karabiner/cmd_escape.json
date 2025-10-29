@@ -1,0 +1,21 @@
+{
+    "description": "Cmd+ESC -> Cmd+§",
+    "manipulators": [
+        {
+            "from": {
+                "key_code": "escape",
+                "modifiers": {
+                    "mandatory": ["left_command"],
+                    "optional": ["any"]
+                }
+            },
+            "to": [
+                {
+                    "key_code": "non_us_backslash",
+                    "modifiers": ["left_command"]
+                }
+            ],
+            "type": "basic"
+        }
+    ]
+}
