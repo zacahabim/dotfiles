@@ -53,5 +53,5 @@ vim.g.clipboard = {
   },
 }
 
-vim.cmd("colorscheme carbonfox")
+vim.cmd("colorscheme duskfox")
 

@@ -106,7 +106,7 @@ return {
 			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
 			-- Lua
-			require("lspconfig")["lua_ls"].setup({
+			vim.lsp.config('lua_ls', {
 				on_attach = on_attach,
 				capabilities = capabilities,
 				settings = {
@@ -126,11 +126,11 @@ return {
 					},
 				},
 			})
-			require("lspconfig")["pyright"].setup({
+			vim.lsp.config('pyright', {
 				on_attach = on_attach,
 				capabilities = capabilities,
 			})
-			require("lspconfig")["yamlls"].setup({
+			vim.lsp.config('yamlls', {
 				on_attach = on_attach,
 				capabilities = capabilities,
 			})
