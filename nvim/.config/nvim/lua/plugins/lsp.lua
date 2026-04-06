@@ -134,6 +134,9 @@ return {
 				on_attach = on_attach,
 				capabilities = capabilities,
 			})
+			vim.lsp.enable('lua_ls')
+			vim.lsp.enable('pyright')
+			vim.lsp.enable('yamlls')
 		end
 	},
 }
