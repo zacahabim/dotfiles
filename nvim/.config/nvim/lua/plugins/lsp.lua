@@ -16,7 +16,6 @@ return {
 			"stevearc/dressing.nvim",
 		},
 		config = function()
-			-- Set up Mason before anything else
 			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
@@ -24,40 +23,27 @@ return {
 					"bashls",
 					"gopls",
 					"helm_ls",
+					"lua_ls",
 					"pyright",
 					"yamlls",
 				},
 				automatic_installation = true,
-				sources = {
-				  "nvim_lsp",
-				  "luasnip",
-				},
-				automatic_enable = false,
-				handlers = {},
 			})
 
-			-- Quick access via keymap
 			require("helpers.keys").map("n", "<leader>M", "<cmd>Mason<cr>", "Show Mason")
-
-			-- Neodev setup before LSP config
 			require("neodev").setup()
-
-			-- Turn on LSP status information
 			require("fidget").setup()
 
-			-- Set up cool signs for diagnostics
-			local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+			-- Diagnostic signs
+			local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
 			for type, icon in pairs(signs) do
 				local hl = "DiagnosticSign" .. type
 				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
 			end
 
-			-- Diagnostic config
-			local config = {
+			vim.diagnostic.config({
 				virtual_text = false,
-				signs = {
-					active = signs,
-				},
+				signs = { active = signs },
 				update_in_insert = true,
 				underline = true,
 				severity_sort = true,
@@ -69,54 +55,53 @@ return {
 					header = "",
 					prefix = "",
 				},
-			}
-			vim.diagnostic.config(config)
+			})
 
-			-- This function gets run when an LSP connects to a particular buffer.
-			local on_attach = function(client, bufnr)
-				local lsp_map = require("helpers.keys").lsp_map
+			-- Keybindings on LSP attach
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(ev)
+					local bufnr = ev.buf
+					local client = vim.lsp.get_client_by_id(ev.data.client_id)
+					local lsp_map = require("helpers.keys").lsp_map
 
-				lsp_map("<leader>le", vim.diagnostic.open_float, bufnr, "Open diagnostics")
-				lsp_map("[d", vim.diagnostic.goto_prev, bufnr, "Goto Next diagnostics")
-				lsp_map("]d", vim.diagnostic.goto_next, bufnr, "Goto Prev diagnostics")
-				lsp_map("<leader>lq", vim.diagnostic.setloclist, bufnr, "Set location list")
-				lsp_map("<leader>lr", vim.lsp.buf.rename, bufnr, "Rename symbol")
-				lsp_map("<leader>la", vim.lsp.buf.code_action, bufnr, "Code action")
-				lsp_map("<leader>ld", vim.lsp.buf.type_definition, bufnr, "Type definition")
-				lsp_map("<leader>ls", vim.lsp.buf.document_symbol, bufnr, "Document symbols")
-				lsp_map("gr", vim.lsp.buf.references, bufnr, "Goto References")
-				lsp_map("gd", vim.lsp.buf.definition, bufnr, "Goto Definition")
-				lsp_map("gD", vim.lsp.buf.declaration, bufnr, "Goto Declaration")
-				lsp_map("gi", vim.lsp.buf.implementation, bufnr, "Goto Implementation")
-				lsp_map("gk", vim.lsp.buf.hover, bufnr, "Hover Documentation")
+					lsp_map("<leader>le", vim.diagnostic.open_float, bufnr, "Open diagnostics")
+					lsp_map("[d", vim.diagnostic.goto_prev, bufnr, "Goto Prev diagnostics")
+					lsp_map("]d", vim.diagnostic.goto_next, bufnr, "Goto Next diagnostics")
+					lsp_map("<leader>lq", vim.diagnostic.setloclist, bufnr, "Set location list")
+					lsp_map("<leader>lr", vim.lsp.buf.rename, bufnr, "Rename symbol")
+					lsp_map("<leader>la", vim.lsp.buf.code_action, bufnr, "Code action")
+					lsp_map("<leader>ld", vim.lsp.buf.type_definition, bufnr, "Type definition")
+					lsp_map("<leader>ls", vim.lsp.buf.document_symbol, bufnr, "Document symbols")
+					lsp_map("gr", vim.lsp.buf.references, bufnr, "Goto References")
+					lsp_map("gd", vim.lsp.buf.definition, bufnr, "Goto Definition")
+					lsp_map("gD", vim.lsp.buf.declaration, bufnr, "Goto Declaration")
+					lsp_map("gi", vim.lsp.buf.implementation, bufnr, "Goto Implementation")
+					lsp_map("gk", vim.lsp.buf.hover, bufnr, "Hover Documentation")
 
-				-- Create a command `:Format` local to the LSP buffer
-				vim.api.nvim_buf_create_user_command(bufnr, "Format", function(_)
-					vim.lsp.buf.format()
-				end, { desc = "Format current buffer with LSP" })
+					vim.api.nvim_buf_create_user_command(bufnr, "Format", function(_)
+						vim.lsp.buf.format()
+					end, { desc = "Format current buffer with LSP" })
+					lsp_map("<leader>cf", "<cmd>Format<cr>", bufnr, "Format")
 
-				lsp_map("<leader>cf", "<cmd>Format<cr>", bufnr, "Format")
+					if client then
+						require("illuminate").on_attach(client)
+					end
+				end,
+			})
 
-				-- Attach and configure vim-illuminate
-				require("illuminate").on_attach(client)
-			end
+			-- Capabilities for nvim-cmp
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-			-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-			local capabilities = vim.lsp.protocol.make_client_capabilities()
-			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
-
-			-- Lua
-			vim.lsp.config('lua_ls', {
-				on_attach = on_attach,
+			-- Configure servers with vim.lsp.config (Neovim 0.11+ API)
+			vim.lsp.config("*", {
 				capabilities = capabilities,
+			})
+
+			vim.lsp.config("lua_ls", {
 				settings = {
 					Lua = {
-						completion = {
-							callSnippet = "Replace",
-						},
-						diagnostics = {
-							globals = { "vim" },
-						},
+						completion = { callSnippet = "Replace" },
+						diagnostics = { globals = { "vim" } },
 						workspace = {
 							library = {
 								[vim.fn.expand("$VIMRUNTIME/lua")] = true,
@@ -126,17 +111,8 @@ return {
 					},
 				},
 			})
-			vim.lsp.config('pyright', {
-				on_attach = on_attach,
-				capabilities = capabilities,
-			})
-			vim.lsp.config('yamlls', {
-				on_attach = on_attach,
-				capabilities = capabilities,
-			})
-			vim.lsp.enable('lua_ls')
-			vim.lsp.enable('pyright')
-			vim.lsp.enable('yamlls')
-		end
+
+			vim.lsp.enable({ "ansiblels", "bashls", "gopls", "helm_ls", "lua_ls", "pyright", "yamlls" })
+		end,
 	},
 }
