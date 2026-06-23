@@ -25,6 +25,8 @@ return {
 					"helm_ls",
 					"lua_ls",
 					"pyright",
+					"robotframework_ls",
+					"ts_ls",
 					"yamlls",
 				},
 				automatic_installation = true,
@@ -112,7 +114,7 @@ return {
 				},
 			})
 
-			vim.lsp.enable({ "ansiblels", "bashls", "gopls", "helm_ls", "lua_ls", "pyright", "yamlls" })
+			vim.lsp.enable({ "ansiblels", "bashls", "gopls", "helm_ls", "lua_ls", "pyright", "robotframework_ls", "ts_ls", "yamlls" })
 		end,
 	},
 }
