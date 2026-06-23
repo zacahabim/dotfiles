@@ -11,7 +11,7 @@ local act = wezterm.action
 -- This is where you actually apply your config choices
 
 -- For example, changing the color scheme:
-config.color_scheme = 'Atom'
+config.color_scheme = 'Catppuccin Latte'
 config.font = wezterm.font 'JetBrains Mono'
 
 if wezterm.target_triple == 'x86_64-apple-darwin' or
