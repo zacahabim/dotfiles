@@ -3,59 +3,75 @@ return {
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
-		main = "nvim-treesitter.configs",
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter-textobjects",
-		},
-		opts = {
-			-- Add languages to be installed here that you want installed for treesitter
-			ensure_installed = { "c", "cpp", "go", "lua", "python", "rust", "vimdoc", "vim" },
+		config = function()
+			require("nvim-treesitter").setup({})
+			-- Install parsers
+			local installed = require("nvim-treesitter.config").get_installed()
+			local ensure = { "c", "cpp", "go", "lua", "python", "rust", "vimdoc", "vim" }
+			local to_install = vim.tbl_filter(function(lang)
+				return not vim.list_contains(installed, lang)
+			end, ensure)
+			if #to_install > 0 then
+				require("nvim-treesitter.install").install(to_install)
+			end
 
-			highlight = { enable = true },
-			indent = { enable = true, disable = { "python" } },
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "<c-space>",
-					node_incremental = "<c-space>",
-					scope_incremental = "<c-s>",
-					node_decremental = "<c-backspace>",
-				},
-			},
-			textobjects = {
-				select = {
-					enable = true,
-					lookahead = true,
-					keymaps = {
-						["aa"] = "@parameter.outer",
-						["ia"] = "@parameter.inner",
-						["af"] = "@function.outer",
-						["if"] = "@function.inner",
-						["ac"] = "@class.outer",
-						["ic"] = "@class.inner",
-					},
-				},
-				move = {
-					enable = true,
-					set_jumps = true,
-					goto_next_start = {
-						["]m"] = "@function.outer",
-						["]]"] = "@class.outer",
-					},
-					goto_next_end = {
-						["]M"] = "@function.outer",
-						["]["] = "@class.outer",
-					},
-					goto_previous_start = {
-						["[m"] = "@function.outer",
-						["[["] = "@class.outer",
-					},
-					goto_previous_end = {
-						["[M"] = "@function.outer",
-						["[]"] = "@class.outer",
-					},
-				},
-			},
-		},
+			-- Enable treesitter highlight and indent (built-in)
+			vim.api.nvim_create_autocmd("FileType", {
+				callback = function(args)
+					pcall(vim.treesitter.start, args.buf)
+				end,
+			})
+		end,
+	},
+	{
+		"nvim-treesitter/nvim-treesitter-textobjects",
+		branch = "main",
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
+		config = function()
+			require("nvim-treesitter-textobjects").setup({
+				select = { lookahead = true },
+				move = { set_jumps = true },
+			})
+
+			-- Select keymaps
+			local select_fn = function(query)
+				return function()
+					require("nvim-treesitter-textobjects.select").select_textobject(query, "textobjects")
+				end
+			end
+			vim.keymap.set({ "x", "o" }, "aa", select_fn("@parameter.outer"))
+			vim.keymap.set({ "x", "o" }, "ia", select_fn("@parameter.inner"))
+			vim.keymap.set({ "x", "o" }, "af", select_fn("@function.outer"))
+			vim.keymap.set({ "x", "o" }, "if", select_fn("@function.inner"))
+			vim.keymap.set({ "x", "o" }, "ac", select_fn("@class.outer"))
+			vim.keymap.set({ "x", "o" }, "ic", select_fn("@class.inner"))
+
+			-- Move keymaps
+			local move = require("nvim-treesitter-textobjects.move")
+			vim.keymap.set({ "n", "x", "o" }, "]m", function()
+				move.goto_next_start("@function.outer", "textobjects")
+			end)
+			vim.keymap.set({ "n", "x", "o" }, "]]", function()
+				move.goto_next_start("@class.outer", "textobjects")
+			end)
+			vim.keymap.set({ "n", "x", "o" }, "]M", function()
+				move.goto_next_end("@function.outer", "textobjects")
+			end)
+			vim.keymap.set({ "n", "x", "o" }, "][", function()
+				move.goto_next_end("@class.outer", "textobjects")
+			end)
+			vim.keymap.set({ "n", "x", "o" }, "[m", function()
+				move.goto_previous_start("@function.outer", "textobjects")
+			end)
+			vim.keymap.set({ "n", "x", "o" }, "[[", function()
+				move.goto_previous_start("@class.outer", "textobjects")
+			end)
+			vim.keymap.set({ "n", "x", "o" }, "[M", function()
+				move.goto_previous_end("@function.outer", "textobjects")
+			end)
+			vim.keymap.set({ "n", "x", "o" }, "[]", function()
+				move.goto_previous_end("@class.outer", "textobjects")
+			end)
+		end,
 	},
 }
