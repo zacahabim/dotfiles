@@ -33,20 +33,7 @@ fi
 
 CONTENT="[user]
 	email = $EMAIL
-	name = $NAME
-[include]
-	path = $ALIAS_PATH
-[core]
-	editor = $EDITOR_CMD"
-
-if [[ "$USE_LFS" == "yes" ]]; then
-    CONTENT+="
-[filter \"lfs\"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true"
-fi
+	name = $NAME"
 
 if [[ "$USE_GPG" == "yes" ]]; then
     if [[ "${1:-}" == "-m" ]]; then
@@ -67,10 +54,34 @@ if [[ "$USE_GPG" == "yes" ]]; then
         GPG_KEY=""
     fi
     CONTENT+="
+	signingkey = $GPG_KEY"
+fi
+
+CONTENT+="
+[include]
+	path = $ALIAS_PATH
+[core]
+	editor = $EDITOR_CMD"
+
+if [[ "$USE_LFS" == "yes" ]]; then
+    CONTENT+="
+[filter \"lfs\"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true"
+fi
+
+if [[ "$USE_GPG" == "yes" ]]; then
+    CONTENT+="
+[gpg]
+	program = gpg
 [commit]
 	gpgsign = true
-[user]
-	signingkey = $GPG_KEY"
+[tag]
+	gpgsign = true
+[push]
+	gpgsign = if-asked"
 fi
 
 echo ""
