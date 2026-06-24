@@ -61,7 +61,8 @@ CONTENT+="
 [include]
 	path = $ALIAS_PATH
 [core]
-	editor = $EDITOR_CMD"
+	editor = $EDITOR_CMD
+	hooksPath = ~/.git-hooks"
 
 if [[ "$USE_LFS" == "yes" ]]; then
     CONTENT+="
@@ -93,8 +94,24 @@ read -rp "Write to $OUTPUT? [y/N]: " confirm
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
     echo "$CONTENT" > "$OUTPUT"
     cp "$(dirname "$0")/.gitalias.txt" "$HOME/.gitalias.txt"
+
+    # Install global pre-commit hook
+    mkdir -p "$HOME/.git-hooks"
+    cat > "$HOME/.git-hooks/pre-commit" <<'HOOK'
+#!/usr/bin/env bash
+EMAIL=$(git config user.email)
+echo "Committing as: $EMAIL"
+read -rp "Continue? [Y/n]: " confirm </dev/tty
+if [[ "$confirm" =~ ^[Nn]$ ]]; then
+    echo "Aborted."
+    exit 1
+fi
+HOOK
+    chmod +x "$HOME/.git-hooks/pre-commit"
+
     echo "Written to $OUTPUT"
     echo "Copied .gitalias.txt to $HOME/.gitalias.txt"
+    echo "Installed global pre-commit hook to $HOME/.git-hooks/pre-commit"
 else
     echo "Aborted."
 fi

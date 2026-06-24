@@ -37,4 +37,4 @@ rm -rf ~/.vim
 rm -f ~/.tmux.conf
 
 stow --target=$HOME vim nvim tmux ranger wezterm vscode
-git/configure-gitconfig.sh
+git/configure-gitconfig.sh ${1:-}
