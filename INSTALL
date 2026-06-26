@@ -36,5 +36,5 @@ cp -r submodules/fzf ~/.fzf
 rm -rf ~/.vim
 rm -f ~/.tmux.conf
 
-stow --target=$HOME vim nvim tmux ranger wezterm vscode
+stow --target=$HOME vim nvim tmux ranger wezterm vscode kitty
 git/configure-gitconfig.sh ${1:-}
