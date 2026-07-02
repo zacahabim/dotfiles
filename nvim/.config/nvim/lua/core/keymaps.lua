@@ -23,8 +23,8 @@ map("n", "[b", ":bprev<CR>", "Previous buffer")
 -- reset syntax highlighting
 map("n", "<leader>hh", ":syntax sync fromstart<CR>", "Refresh syntax highlight")
 
--- neotree
-map("n", "-", ":Neotree<CR>", "Open Neo-tree")
+-- oil.nvim
+map("n", "-", "<CMD>Oil<CR>", "Open parent directory with Oil")
 
 -- fast moving
 map("n", "H", "5h", "Quick h")
@@ -48,3 +48,4 @@ map("v", "<F4>", ":Ggrep <C-r><C-w><CR>", "Git grep")
 -- neo-tree
 map('n', '<leader>nn', ':Neotree toggle<CR>', 'Toggle neo-tree')
 map('v', '<leader>nn', ':Neotree toggle<CR>', 'Toggle neo-tree')
+map('n', '<leader>nf', ':Neotree reveal<CR>', 'Sync Neo-tree to current file')
