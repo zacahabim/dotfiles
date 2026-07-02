@@ -1,3 +1,7 @@
+-- Disable netrw to allow oil.nvim to replace it
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 local opts = {
 	listchars = "nbsp:¬,tab:>-,extends:»,precedes:«,trail:•",
 	list = true,
