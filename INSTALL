@@ -44,8 +44,8 @@ rm -f ~/.tmux.conf
 curl -L https://raw.github.com/ymattw/ydiff/master/ydiff.py > ~/.local/bin/ydiff
 chmod +x ~/.local/bin/ydiff
 # install diff-so-fancy
-curl -L https://github.com/so-fancy/diff-so-fancy/releases/download/latest/diff-so-fancy > ~/.local/bin/diff-so-fancy
-
+curl -L https://github.com/so-fancy/diff-so-fancy/releases/latest/download/diff-so-fancy > ~/.local/bin/diff-so-fancy
+chmod +x ~/.local/bin/diff-so-fancy
 
 stow --target=$HOME vim nvim tmux ranger wezterm vscode kitty lazygit
 git/configure-gitconfig.sh ${1:-}
