@@ -160,8 +160,8 @@ set t_Co=256
 " Range:   252 (darkest) ~ 256 (lightest)
 " Default: 253
 "-------------------------------------------------------------------------------
-let g:seoul256_background = 235
-set bg=dark
+let g:seoul256_background = 253
+set bg=light
 colo seoul256
 
 "-------------------------------------------------------------------------------
