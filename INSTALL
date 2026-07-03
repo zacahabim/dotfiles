@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-mkdir --parent ~/.local/bin
+mkdir -p ~/.local/bin
 
 export PLATFORM=$(uname -s)
 
