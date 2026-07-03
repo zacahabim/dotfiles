@@ -26,50 +26,27 @@ return {
     -- Keymaps within oil buffer
     keymaps = {
       ["g?"] = "actions.show_help",
-      ["<CR>"] = {
+      ["<CR>"] = "actions.select",
+      ["<C-j>"] = {
         callback = function()
           local oil = require("oil")
           local entry = oil.get_cursor_entry()
-          if entry then
-            if entry.type == "directory" then
-              oil.select()
-            else
-              -- Get all normal editor windows in current tab to see if we should prompt
-              local wins = vim.api.nvim_tabpage_list_wins(0)
-              local normal_wins = {}
-              for _, win in ipairs(wins) do
-                local config = vim.api.nvim_win_get_config(win)
-                -- Only count non-floating normal windows
-                if config.relative == "" then
-                  local buf = vim.api.nvim_win_get_buf(win)
-                  local ft = vim.bo[buf].filetype
-                  local bt = vim.bo[buf].buftype
-                  if ft ~= "neo-tree" and ft ~= "neo-tree-popup" and ft ~= "notify" and bt ~= "terminal" and bt ~= "quickfix" then
-                    table.insert(normal_wins, win)
-                  end
-                end
-              end
-
-              if #normal_wins <= 1 then
-                -- Fallback: If only 1 normal window (which is the current oil window), open in it
-                oil.select()
-              else
-                -- Prompt window picker to choose where to open the file
-                local picker = require("window-picker")
-                local picked_window_id = picker.pick_window()
-                if picked_window_id then
-                  oil.select({
-                    handle_buffer_callback = function(buf_id)
-                      vim.api.nvim_win_set_buf(picked_window_id, buf_id)
-                      vim.api.nvim_set_current_win(picked_window_id)
-                    end,
-                  })
-                end
-              end
+          if entry and entry.type ~= "directory" then
+            local picker = require("window-picker")
+            local picked_window_id = picker.pick_window()
+            if picked_window_id then
+              oil.select({
+                handle_buffer_callback = function(buf_id)
+                  vim.api.nvim_win_set_buf(picked_window_id, buf_id)
+                  vim.api.nvim_set_current_win(picked_window_id)
+                end,
+              })
             end
+          elseif entry and entry.type == "directory" then
+            oil.select()
           end
         end,
-        desc = "Open file in selected window using window-picker, or navigate directory",
+        desc = "Open file in a picked window using window-picker",
       },
       ["<C-s>"] = { "actions.select", opts = { vertical = true }, desc = "Open the entry in a vertical split" },
       ["<C-h>"] = { "actions.select", opts = { horizontal = true }, desc = "Open the entry in a horizontal split" },
