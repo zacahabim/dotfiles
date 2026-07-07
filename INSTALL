@@ -7,7 +7,8 @@ mkdir -p ~/.local/bin
 export PLATFORM=$(uname -s)
 
 if [ "$PLATFORM" = Linux ]; then
-   # sudo apt-get update
+   sudo apt-get update
+   sudo apt-get install -y tig
    # sudo apt-get install -y stow golang python3-pip python3.10-venv ranger
    # curl -fsSL https://deb.nodesource.com/setup_21.x | sudo -E bash - &&\
    #     sudo apt-get install -y nodejs
@@ -25,7 +26,7 @@ elif [ "$PLATFORM" = Darwin ]; then
     brew install stow
     # brew install golang node python3
     # pip3 install virtualenv
-    brew install font-hack-nerd-font
+    brew install font-hack-nerd-font tig
 fi
 
 echo "Fetch all git submodules..."
