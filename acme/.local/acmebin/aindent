@@ -1,0 +1,36 @@
+#!/bin/sh
+# aindent - indent or unindent the selected text in acme
+# Usage: aindent       (indent with a tab)
+#        aindent -u    (unindent one level)
+#        aindent -s N  (indent with N spaces)
+
+if [ -z "$winid" ]; then
+    echo "aindent: must be run from within an acme window" >&2
+    exit 1
+fi
+
+unindent=false
+indent="\t"
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -u) unindent=true; shift ;;
+        -s) shift; indent=$(printf "%${1}s" ""); shift ;;
+        *)  shift ;;
+    esac
+done
+
+sel=$(9p read acme/$winid/rdsel)
+
+if [ -z "$sel" ]; then
+    exit 0
+fi
+
+if [ "$unindent" = true ]; then
+    # Remove one leading tab or up to 4 leading spaces
+    result=$(printf '%s' "$sel" | sed 's/^\t//; t; s/^    //')
+else
+    result=$(printf '%s' "$sel" | sed "s/^/${indent}/")
+fi
+
+printf '%s' "$result" | 9p write acme/$winid/wrsel

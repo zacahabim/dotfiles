@@ -1,0 +1,15 @@
+#!/bin/sh
+# aname - get or set the current acme window name
+# Usage: aname          (print current window name)
+#        aname newname  (set window name)
+
+if [ -z "$winid" ]; then
+    echo "aname: must be run from within an acme window" >&2
+    exit 1
+fi
+
+if [ $# -eq 0 ]; then
+    9p read acme/$winid/tag | sed 1q | awk '{print $1}'
+else
+    echo "name $1" | 9p write acme/$winid/ctl
+fi

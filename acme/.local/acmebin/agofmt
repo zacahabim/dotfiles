@@ -1,0 +1,26 @@
+#!/bin/sh
+# agofmt - format the current acme window with goimports (or gofmt)
+# Usage: agofmt
+# Formats the entire buffer using goimports if available, otherwise gofmt.
+
+if [ -z "$winid" ]; then
+    echo "agofmt: must be run from within an acme window" >&2
+    exit 1
+fi
+
+if command -v goimports >/dev/null 2>&1; then
+    formatter="goimports"
+else
+    formatter="gofmt"
+fi
+
+echo 'comma' | 9p write acme/$winid/addr
+body=$(9p read acme/$winid/data)
+formatted=$(printf '%s' "$body" | $formatter 2>/tmp/agofmt.err)
+
+if [ $? -eq 0 ]; then
+    echo 'comma' | 9p write acme/$winid/addr
+    printf '%s' "$formatted" | 9p write acme/$winid/data
+else
+    cat /tmp/agofmt.err >&2
+fi
