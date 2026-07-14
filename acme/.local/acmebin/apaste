@@ -1,0 +1,25 @@
+#!/bin/sh
+# apaste - paste system clipboard contents into the current acme window
+# Usage: apaste
+# Replaces the current selection (or inserts at dot) with clipboard content.
+
+if [ -z "$winid" ]; then
+    echo "apaste: must be run from within an acme window" >&2
+    exit 1
+fi
+
+# Detect clipboard command
+if command -v xclip >/dev/null 2>&1; then
+    clip="xclip -selection clipboard -o"
+elif command -v xsel >/dev/null 2>&1; then
+    clip="xsel --clipboard --output"
+elif command -v wl-paste >/dev/null 2>&1; then
+    clip="wl-paste"
+elif command -v pbpaste >/dev/null 2>&1; then
+    clip="pbpaste"
+else
+    echo "apaste: no clipboard tool found" >&2
+    exit 1
+fi
+
+$clip | 9p write acme/$winid/wrsel

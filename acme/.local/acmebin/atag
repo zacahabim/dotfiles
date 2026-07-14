@@ -1,0 +1,17 @@
+#!/bin/sh
+# atag - append commands to the current acme window tag
+# Usage: atag text...
+# Appends the given text to the window's tag line.
+
+if [ -z "$winid" ]; then
+    echo "atag: must be run from within an acme window" >&2
+    exit 1
+fi
+
+if [ $# -eq 0 ]; then
+    # Print current tag
+    9p read acme/$winid/tag
+    exit 0
+fi
+
+echo " $*" | 9p write acme/$winid/tag

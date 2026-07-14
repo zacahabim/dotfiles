@@ -1,0 +1,24 @@
+#!/bin/sh
+# acopy - copy the current acme selection to the system clipboard
+# Usage: acopy
+
+if [ -z "$winid" ]; then
+    echo "acopy: must be run from within an acme window" >&2
+    exit 1
+fi
+
+# Detect clipboard command
+if command -v xclip >/dev/null 2>&1; then
+    clip="xclip -selection clipboard -i"
+elif command -v xsel >/dev/null 2>&1; then
+    clip="xsel --clipboard --input"
+elif command -v wl-copy >/dev/null 2>&1; then
+    clip="wl-copy"
+elif command -v pbcopy >/dev/null 2>&1; then
+    clip="pbcopy"
+else
+    echo "acopy: no clipboard tool found" >&2
+    exit 1
+fi
+
+9p read acme/$winid/rdsel | $clip

@@ -1,0 +1,11 @@
+#!/bin/sh
+# asel - print the current selection from the acme window body
+# Usage: asel
+# Prints the selected text to stdout.
+
+if [ -z "$winid" ]; then
+    echo "asel: must be run from within an acme window" >&2
+    exit 1
+fi
+
+9p read acme/$winid/rdsel

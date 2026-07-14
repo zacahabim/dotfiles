@@ -1,0 +1,11 @@
+#!/bin/sh
+# agrep - recursive grep with results formatted for acme plumbing
+# Usage: agrep [grep-options] pattern [path]
+# Results are in file:line: format so acme can plumb them.
+
+if [ $# -eq 0 ]; then
+    echo "usage: agrep [options] pattern [path]" >&2
+    exit 1
+fi
+
+exec grep -rn "$@"

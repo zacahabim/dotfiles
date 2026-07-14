@@ -1,0 +1,21 @@
+#!/bin/sh
+# aexec - execute a command and display output in a new acme window
+# Usage: aexec command [args...]
+# Opens a new +Errors-style window with command output.
+
+if [ $# -eq 0 ]; then
+    echo "usage: aexec command [args...]" >&2
+    exit 1
+fi
+
+# Create new window
+id=$(9p read acme/new/ctl | awk '{print $1}')
+name="+$(basename $1)"
+
+echo "name $name" | 9p write acme/$id/ctl
+echo "clean" | 9p write acme/$id/ctl
+
+# Run command and write output
+"$@" 2>&1 | 9p write acme/$id/body
+
+echo "clean" | 9p write acme/$id/ctl

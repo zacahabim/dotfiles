@@ -1,0 +1,51 @@
+#!/bin/sh
+# aremote - execute a command on the remote host if cwd is an sshfs mount
+# Usage: aremote command [args...]
+# If the current directory is inside an sshfs mount, the command is run
+# on the remote host via ssh. Otherwise it runs locally.
+# Requires SSH key auth (no interactive password prompts in acme).
+
+if [ $# -eq 0 ]; then
+    echo "usage: aremote command [args...]" >&2
+    exit 1
+fi
+
+cwd=$(pwd)
+
+# Detect sshfs mount - try findmnt first (Linux), fall back to mount parsing
+if command -v findmnt >/dev/null 2>&1; then
+    mount_info=$(findmnt -T "$cwd" -n -o SOURCE 2>/dev/null)
+    mount_point=$(findmnt -T "$cwd" -n -o TARGET 2>/dev/null)
+else
+    # macOS / BSD fallback: parse mount output for sshfs/osxfuse entries
+    mount_info=$(mount | grep -E 'fuse|sshfs' | while IFS= read -r line; do
+        mp=$(echo "$line" | awk '{print $3}')
+        case "$cwd" in
+            "$mp"*) echo "$line"; break ;;
+        esac
+    done)
+    if [ -n "$mount_info" ]; then
+        mount_point=$(echo "$mount_info" | awk '{print $3}')
+        mount_info=$(echo "$mount_info" | awk '{print $1}')
+    fi
+fi
+
+case "$mount_info" in
+    *@*:*)
+        # sshfs mount detected - extract user@host and remote root path
+        userhost="${mount_info%%:*}"
+        remote_root="${mount_info#*:}"
+        # Calculate the relative path from mount point to cwd
+        rel="${cwd#$mount_point}"
+        remote_dir="${remote_root}${rel}"
+        # Use ControlMaster for connection reuse
+        exec ssh -o ControlMaster=auto \
+                 -o ControlPath=/tmp/ssh-acme-%r@%h:%p \
+                 -o ControlPersist=600 \
+                 "$userhost" "cd '$remote_dir' && $*"
+        ;;
+    *)
+        # Not an sshfs mount, run locally
+        exec "$@"
+        ;;
+esac
