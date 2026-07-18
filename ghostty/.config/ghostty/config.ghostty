@@ -1,0 +1,6 @@
+language = en
+font-family = "JetBrainsMono Nerd Font Mono"
+theme = "Catppuccin Latte"
+shell-integration-features = no-cursor
+cursor-style = block
+cursor-style-blink = false
