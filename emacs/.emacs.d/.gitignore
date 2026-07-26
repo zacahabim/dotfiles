@@ -1,0 +1,11 @@
+auto-save-list/**
+elpa/**
+undo/**
+**/*.elc
+recentf
+tramp
+eln-cache
+eshell
+transient
+projectile-bookmarks.eld
+org-persist
