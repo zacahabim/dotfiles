@@ -57,6 +57,44 @@
 ;; enable mouse usage in terminal
 (xterm-mouse-mode)
 
+;; Auto-revert buffers when files change on disk
+(global-auto-revert-mode 1)
+
+;; Replace selected region on yank/type
+(delete-selection-mode 1)
+
+;; Toggle results buffers (xref, grep, compilation, etc.)
+(defun my-toggle-results-buffer ()
+  "Toggle display of a results buffer (*xref*, *grep*, *rg*, *compilation*)."
+  (interactive)
+  (let* ((buffers '("*xref*" "*grep*" "*rg*" "*compilation*"))
+         (visible (cl-find-if
+                   (lambda (name)
+                     (and (get-buffer name)
+                          (get-buffer-window name)))
+                   buffers))
+         (available (cl-find-if #'get-buffer buffers)))
+    (cond
+     (visible (quit-window nil (get-buffer-window visible)))
+     (available (display-buffer available))
+     (t (message "No results buffer found.")))))
+
+;; Make q just hide the window in results buffers
+(with-eval-after-load 'xref
+  (define-key xref--xref-buffer-mode-map (kbd "q") #'quit-window))
+
+(global-set-key (kbd "C-c x") #'my-toggle-results-buffer)
+
+;; Copy file path relative to git root to clipboard
+(defun my-copy-file-path ()
+  "Copy the current file's path relative to git root to clipboard."
+  (interactive)
+  (let* ((git-root (string-trim (shell-command-to-string "git rev-parse --show-toplevel")))
+         (rel-path (file-relative-name (buffer-file-name) git-root)))
+    (kill-new rel-path)
+    (message "%s" rel-path)))
+(global-set-key (kbd "C-c y p") #'my-copy-file-path)
+
 ;; OSC 52 clipboard support
 ;; Works regardless of TERM value, through tmux and SSH
 (unless (display-graphic-p)

@@ -15,12 +15,14 @@ This command does not push erased text to kill-ring."
   (my-delete-word (- arg)))
 
 (defun my-delete-line ()
-  "Delete text from current position to end of line char."
+  "Delete text from current position to end of line char.
+If at end of line, delete the newline character."
   (interactive)
-  (delete-region
-   (point)
-   (save-excursion (move-end-of-line 1) (point)))
-)
+  (if (eolp)
+      (delete-char 1)
+    (delete-region
+     (point)
+     (save-excursion (move-end-of-line 1) (point)))))
 
 (defun my-delete-line-backward ()
   "Delete text between the beginning of the line to the cursor position."
