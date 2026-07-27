@@ -320,6 +320,17 @@
    (magit-post-refresh . diff-hl-magit-post-refresh))
   )
 
+;; Git commit message formatting
+(require 'git-commit)
+(add-to-list 'auto-mode-alist '("/COMMIT_EDITMSG\\'" . git-commit-mode))
+(add-to-list 'auto-mode-alist '("/MERGE_MSG\\'" . git-commit-mode))
+(setq git-commit-summary-max-length 50)
+(setq git-commit-fill-column 72)
+(add-hook 'git-commit-mode-hook
+          (lambda ()
+            (setq fill-column 72)
+            (display-fill-column-indicator-mode 1)))
+
 ;; ripgrep
 ;; package-install rg
 (use-package rg
