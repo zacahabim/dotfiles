@@ -58,5 +58,5 @@ vim.g.clipboard = {
 }
 
 -- vim.cmd("colorscheme catppuccin-latte")
-vim.cmd("colorscheme dawnfox")
+vim.cmd("colorscheme duskfox")
 
