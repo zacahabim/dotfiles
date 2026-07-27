@@ -12,6 +12,29 @@
 
 (add-to-list 'exec-path (expand-file-name "~/.local/bin"))
 
+;; -------------------------------------------------------------------
+;; Local LSP server directory (managed by Emacs, not system-wide)
+;; Install servers with:
+;;   GOPATH=~/.emacs.d/lsp-servers go install golang.org/x/tools/gopls@latest
+;;   pip install --prefix=~/.emacs.d/lsp-servers robotframework-lsp
+;;   pip install --prefix=~/.emacs.d/lsp-servers pyright
+;; -------------------------------------------------------------------
+(defvar my-lsp-server-dir (expand-file-name "lsp-servers" user-emacs-directory))
+(make-directory my-lsp-server-dir t)
+(make-directory (concat my-lsp-server-dir "/bin") t)
+
+;; Add bin directories to exec-path
+(add-to-list 'exec-path (concat my-lsp-server-dir "/bin"))
+
+;; Update PATH environment variable so subprocesses (eglot) can find them
+(setenv "PATH" (concat (concat my-lsp-server-dir "/bin") ":" (getenv "PATH")))
+
+;; Also set PYTHONPATH for pip --prefix installed packages
+(let ((site-packages (car (file-expand-wildcards
+                           (concat my-lsp-server-dir "/lib/python*/site-packages")))))
+  (when site-packages
+    (setenv "PYTHONPATH" (concat site-packages ":" (or (getenv "PYTHONPATH") "")))))
+
 (add-to-list 'load-path "~/.emacs.d/elisp")
 (require 'terminal-key-mappings)
 (require 'some-configurations)
@@ -32,12 +55,18 @@
 ;; enable mouse usage in terminal
 (xterm-mouse-mode)
 
-;; package-install clipetty
-(use-package clipetty
-  :ensure t
-  :config
-  (global-clipetty-mode)
-  )
+;; OSC 52 clipboard support
+;; Works regardless of TERM value, through tmux and SSH
+(unless (display-graphic-p)
+  (defun my-osc52-copy (text)
+    "Copy TEXT to system clipboard via OSC 52 escape sequence."
+    (let* ((encoded (base64-encode-string (encode-coding-string text 'utf-8-unix) t))
+           (osc (concat "\e]52;c;" encoded "\a"))
+           (payload (if (getenv "TMUX")
+                        (concat "\ePtmux;\e" osc "\e\\")
+                      osc)))
+      (send-string-to-terminal payload)))
+  (setq interprogram-cut-function #'my-osc52-copy))
 
 (use-package kkp
   :ensure t
@@ -98,11 +127,32 @@
   )
 )
 
+;; go-mode
+(use-package go-mode
+  :ensure t
+  :defer t
+  :hook ((go-mode . (lambda ()
+                      (setq tab-width 4)
+                      (setq indent-tabs-mode t)
+                      (add-hook 'before-save-hook #'eglot-format-buffer nil t)
+                      (add-hook 'before-save-hook #'my-eglot-organize-imports nil t)))))
+
+;; robot-mode for Robot Framework
+(use-package robot-mode
+  :ensure t
+  :defer t
+  :mode ("\\.robot\\'" . robot-mode)
+  :hook (robot-mode . eglot-ensure))
+
 ;; eglot
 (add-hook 'prog-mode-hook 'eglot-ensure)
 ;; configure python-mode to use pyright language
-(require' eglot)
+(require 'eglot)
 (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
+;; configure go-mode to use gopls
+(add-to-list 'eglot-server-programs '(go-mode . ("gopls")))
+;; configure robot-mode to use robotframework-lsp
+(add-to-list 'eglot-server-programs '(robot-mode . ("robotframework_ls")))
 ;; configure tramp to use the remote host path
 (with-eval-after-load 'tramp
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
@@ -309,4 +359,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "JetBrainsMono Nerd Font" :foundry "JB" :slant normal :weight regular :height 140 :width normal)))))
+ '(default ((t (:family "JetBrainsMono Nerd Font" :foundry "JB" :slant normal :weight regular :height 120 :width normal)))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages nil))
