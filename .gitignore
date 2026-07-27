@@ -2,3 +2,4 @@
 **/#*#
 nvim/.config/nvim/lua/core/work.lua
 *.bak
+.work_email

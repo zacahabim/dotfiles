@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+WORK_EMAIL_FILE="$(dirname "$0")/.work_email"
+
+read -rp "Enter your work email: " email
+
+if [[ -z "$email" ]]; then
+    echo "Error: email cannot be empty."
+    exit 1
+fi
+
+echo "$email" > "$WORK_EMAIL_FILE"
+echo "Work email saved to .work_email"

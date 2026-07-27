@@ -17,9 +17,51 @@ prompt() {
     eval "$var=\"${input:-$default}\""
 }
 
+prompt_email() {
+    local var="$1"
+    local script_dir
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+    local repo_root
+    repo_root="$(cd "$script_dir" && git rev-parse --show-toplevel 2>/dev/null || echo "$script_dir/..")"
+    local work_email_file="$repo_root/.work_email"
+    local work_email=""
+    if [[ -f "$work_email_file" ]]; then
+        work_email=$(cat "$work_email_file")
+    fi
+
+    echo ""
+    echo "Select email:"
+    echo "  1) $DEFAULT_EMAIL (default)"
+    if [[ -n "$work_email" ]]; then
+        echo "  2) $work_email (work)"
+        echo "  3) Custom"
+    else
+        echo "  2) Custom"
+    fi
+    read -rp "Choice [1]: " choice
+    choice="${choice:-1}"
+
+    case "$choice" in
+        1) eval "$var=\"$DEFAULT_EMAIL\"" ;;
+        2)
+            if [[ -n "$work_email" ]]; then
+                eval "$var=\"$work_email\""
+            else
+                read -rp "Enter email: " custom_email
+                eval "$var=\"$custom_email\""
+            fi
+            ;;
+        3)
+            read -rp "Enter email: " custom_email
+            eval "$var=\"$custom_email\""
+            ;;
+        *) eval "$var=\"$DEFAULT_EMAIL\"" ;;
+    esac
+}
+
 if [[ "${1:-}" == "-m" ]]; then
     prompt NAME "Name" "$DEFAULT_NAME"
-    prompt EMAIL "Email" "$DEFAULT_EMAIL"
+    prompt_email EMAIL
     prompt EDITOR_CMD "Editor" "$DEFAULT_EDITOR"
     prompt USE_LFS "Configure git lfs? [yes/no]" "$DEFAULT_LFS"
     prompt USE_GPG "Configure gpg signing? [yes/no]" "$DEFAULT_GPG"
