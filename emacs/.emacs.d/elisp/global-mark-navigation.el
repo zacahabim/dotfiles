@@ -29,7 +29,18 @@
   (call-interactively 'pop-global-mark)
   (setq global-mark-ring (nreverse global-mark-ring)))
 
-(global-set-key (kbd "C-c p") (quote backward-global-mark))
-(global-set-key (kbd "C-c u") (quote forward-global-mark))
+;; Push to global-mark-ring before xref jumps
+(defun my-push-mark-before-xref (&rest _)
+  "Push current position to global-mark-ring before xref navigation."
+  (push-mark nil t))
+
+(advice-add 'xref-find-definitions :before #'my-push-mark-before-xref)
+(advice-add 'xref-find-references :before #'my-push-mark-before-xref)
+(advice-add 'xref-go-back :before #'my-push-mark-before-xref)
+(advice-add 'xref-go-forward :before #'my-push-mark-before-xref)
+(advice-add 'xref-goto-xref :before #'my-push-mark-before-xref)
+
+(global-set-key (kbd "C-c o") (quote backward-global-mark))
+(global-set-key (kbd "C-c i") (quote forward-global-mark))
 
 (provide 'global-mark-navigation)
