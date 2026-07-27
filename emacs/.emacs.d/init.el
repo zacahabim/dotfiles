@@ -84,10 +84,10 @@
 ;;   (load-theme 'nord t)
 ;;   )
 
-(use-package monokai-theme
+(use-package monokai-pro-theme
   :ensure t
   :config
-  (load-theme 'monokai t)
+  (load-theme 'monokai-pro t)
   )
 
 (set-face-attribute 'menu nil
@@ -389,4 +389,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages nil))
+ '(package-selected-packages
+   '(cape company corfu counsel diff-hl envrc go-mode import-js kkp magit
+          monokai-pro-theme monokai-theme rg rjsx-mode robot-mode tide
+          typescript-mode undo-tree web-mode xref-js2)))
