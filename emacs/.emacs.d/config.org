@@ -1,0 +1,461 @@
+#+TITLE: Hieu's Emacs Configuration
+#+AUTHOR: Hieu Nguyen
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+
+* Package Management
+
+#+begin_src emacs-lisp
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+#+end_src
+
+* Paths and LSP Servers
+
+#+begin_src emacs-lisp
+(add-to-list 'exec-path (expand-file-name "~/.local/bin"))
+#+end_src
+
+Local LSP server directory managed by Emacs. Install servers with:
+- =GOPATH=~/.emacs.d/lsp-servers GOBIN=~/.emacs.d/lsp-servers/bin go install golang.org/x/tools/gopls@latest=
+- =pip install --prefix=~/.emacs.d/lsp-servers robotframework-lsp=
+- =pip install --prefix=~/.emacs.d/lsp-servers pyright=
+
+#+begin_src emacs-lisp
+(defvar my-lsp-server-dir (expand-file-name "lsp-servers" user-emacs-directory))
+(make-directory my-lsp-server-dir t)
+(make-directory (concat my-lsp-server-dir "/bin") t)
+
+(add-to-list 'exec-path (concat my-lsp-server-dir "/bin"))
+
+(setenv "PATH" (concat (concat my-lsp-server-dir "/bin") ":" (getenv "PATH")))
+
+(let ((site-packages (or (car (file-expand-wildcards
+                               (concat my-lsp-server-dir "/lib/python*/site-packages")))
+                         (car (file-expand-wildcards
+                               (concat my-lsp-server-dir "/local/lib/python*/dist-packages"))))))
+  (when site-packages
+    (setenv "PYTHONPATH" (concat site-packages ":" (or (getenv "PYTHONPATH") "")))))
+#+end_src
+
+* Custom Elisp Modules
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/elisp")
+(require 'terminal-key-mappings)
+(require 'some-configurations)
+(require 'check-my-system-type)
+(require 'delete-no-kill-ring)
+(require 'pyvenv)
+(require 'dockerfile-mode)
+(require 'display-buffer-configurations)
+(require 'global-mark-navigation)
+#+end_src
+
+* Sensible Defaults
+
+#+begin_src emacs-lisp
+(require 'sensible-defaults)
+(sensible-defaults/increase-gc-threshold)
+(sensible-defaults/show-matching-parens)
+(sensible-defaults/use-all-keybindings)
+(sensible-defaults/treat-camelcase-as-separate-words)
+(sensible-defaults/delete-trailing-whitespace)
+#+end_src
+
+* General Settings
+
+#+begin_src emacs-lisp
+(xterm-mouse-mode)
+(global-auto-revert-mode 1)
+(delete-selection-mode 1)
+#+end_src
+
+* Utility Functions
+
+** Toggle Results Buffers
+
+Toggle display of =*xref*=, =*grep*=, =*rg*=, =*compilation*= buffers.
+
+#+begin_src emacs-lisp
+(defun my-toggle-results-buffer ()
+  "Toggle display of a results buffer (*xref*, *grep*, *rg*, *compilation*)."
+  (interactive)
+  (let* ((buffers '("*xref*" "*grep*" "*rg*" "*compilation*"))
+         (visible (cl-find-if
+                   (lambda (name)
+                     (and (get-buffer name)
+                          (get-buffer-window name)))
+                   buffers))
+         (available (cl-find-if #'get-buffer buffers)))
+    (cond
+     (visible (quit-window nil (get-buffer-window visible)))
+     (available (display-buffer available))
+     (t (message "No results buffer found.")))))
+
+(with-eval-after-load 'xref
+  (define-key xref--xref-buffer-mode-map (kbd "q") #'quit-window))
+
+(global-set-key (kbd "C-c x") #'my-toggle-results-buffer)
+#+end_src
+
+** Copy File Path
+
+Copy the current file's path relative to git root to clipboard.
+
+#+begin_src emacs-lisp
+(defun my-copy-file-path ()
+  "Copy the current file's path relative to git root to clipboard."
+  (interactive)
+  (let* ((git-root (string-trim (shell-command-to-string "git rev-parse --show-toplevel")))
+         (rel-path (file-relative-name (buffer-file-name) git-root)))
+    (kill-new rel-path)
+    (message "%s" rel-path)))
+(global-set-key (kbd "C-c y p") #'my-copy-file-path)
+#+end_src
+
+* Clipboard (OSC 52)
+
+Works regardless of TERM value, through tmux and SSH.
+
+#+begin_src emacs-lisp
+(unless (display-graphic-p)
+  (defun my-osc52-copy (text)
+    "Copy TEXT to system clipboard via OSC 52 escape sequence."
+    (let* ((encoded (base64-encode-string (encode-coding-string text 'utf-8-unix) t))
+           (osc (concat "\e]52;c;" encoded "\a"))
+           (payload (if (getenv "TMUX")
+                        (concat "\ePtmux;\e" osc "\e\\")
+                      osc)))
+      (send-string-to-terminal payload)))
+  (setq interprogram-cut-function #'my-osc52-copy))
+#+end_src
+
+* Terminal Key Protocol (KKP)
+
+#+begin_src emacs-lisp
+(use-package kkp
+  :ensure t
+  :config
+  (global-kkp-mode +1))
+#+end_src
+
+* Theme
+
+#+begin_src emacs-lisp
+(use-package monokai-pro-theme
+  :ensure t
+  :config
+  (load-theme 'monokai-pro t))
+
+(set-face-attribute 'menu nil
+                    :inverse-video nil
+                    :background "pink"
+                    :foreground "blue"
+                    :bold t)
+#+end_src
+
+* Undo Tree
+
+#+begin_src emacs-lisp
+(use-package undo-tree
+  :ensure t
+  :init
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+  :config
+  (global-undo-tree-mode)
+  ;; Clear modified flag when buffer matches file on disk after undo
+  (defun my-check-buffer-modified (buf)
+    "Clear modified flag if BUF content matches the file on disk."
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (let ((file buffer-file-name))
+          (when (and file
+                     (file-exists-p file)
+                     (buffer-modified-p)
+                     (verify-visited-file-modtime (current-buffer)))
+            (when (equal (buffer-string)
+                         (with-temp-buffer
+                           (insert-file-contents file)
+                           (buffer-string)))
+              (set-buffer-modified-p nil)))))))
+  (add-hook 'after-change-functions
+            (lambda (&rest _)
+              (let ((buf (current-buffer)))
+                (when (buffer-file-name buf)
+                  (run-with-idle-timer 0.5 nil #'my-check-buffer-modified buf))))))
+#+end_src
+
+* Completion
+
+** Ivy / Counsel
+
+#+begin_src emacs-lisp
+(use-package counsel
+  :ensure t)
+
+(use-package ivy
+  :ensure t
+  :init
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t)
+  :config
+  (ivy-mode)
+  :bind
+  (("C-c C-r" . ivy-resume)
+   ("<f6>" . ivy-resume)
+   ("C-c f f" . counsel-file-jump)
+   ("C-c g f" . counsel-git)
+   ("C-c g g" . vc-git-grep)))
+#+end_src
+
+** Corfu
+
+#+begin_src emacs-lisp
+(use-package corfu
+  :ensure t
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 0.1)
+  (corfu-popupinfo-delay '(0.5 . 0.2))
+  (corfu-preview-current 'insert)
+  (corfu-preselect 'prompt)
+  (corfu-on-exact-match nil)
+  :init
+  (corfu-history-mode)
+  (corfu-popupinfo-mode))
+#+end_src
+
+** Cape
+
+#+begin_src emacs-lisp
+(use-package cape
+  :ensure t
+  :defer 10
+  :config
+  (advice-add #'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
+  (advice-add #'comint-completion-at-point :around #'cape-wrap-nonexclusive)
+  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
+  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-noninterruptible))
+#+end_src
+
+** Company
+
+#+begin_src emacs-lisp
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode))
+#+end_src
+
+* Languages
+
+** Eglot (LSP)
+
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'eglot-ensure)
+(setq eglot-connect-timeout 120)
+
+(require 'eglot)
+(add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
+(add-to-list 'eglot-server-programs '(go-mode . ("gopls")))
+(add-to-list 'eglot-server-programs
+             '(robot-mode . ("python3" "-m" "robotframework_ls")))
+
+(with-eval-after-load 'tramp
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+
+(defun my-eglot-organize-imports () (interactive)
+       (eglot-code-actions nil nil "source.organizeImports" t))
+
+(add-hook 'before-save-hook 'my-eglot-organize-imports nil t)
+#+end_src
+
+** Go
+
+#+begin_src emacs-lisp
+(use-package go-mode
+  :ensure t
+  :defer t
+  :hook ((go-mode . (lambda ()
+                      (setq tab-width 4)
+                      (setq indent-tabs-mode t)
+                      (add-hook 'before-save-hook #'eglot-format-buffer nil t)
+                      (add-hook 'before-save-hook #'my-eglot-organize-imports nil t)))))
+#+end_src
+
+** Robot Framework
+
+#+begin_src emacs-lisp
+(use-package robot-mode
+  :ensure t
+  :defer t
+  :mode ("\\.robot\\'" . robot-mode)
+  :hook (robot-mode . eglot-ensure))
+#+end_src
+
+** TypeScript / JavaScript
+
+#+begin_src emacs-lisp
+(use-package tide
+  :ensure t
+  :after (typescript-mode flycheck)
+  :hook ((typescript-mode    . tide-setup)
+         (tsx-ts-mode        . tide-setup)
+         (typescript-ts-mode . tide-hl-identifier-mode)))
+
+(defun setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1))
+
+(use-package typescript-mode
+  :ensure t
+  :defer t
+  :mode (("\\.js\\'"   . typescript-mode)
+         ("\\.jsx\\'"  . typescript-mode)
+         ("\\.ts\\'"   . typescript-mode)
+         ("\\.tsx\\'"  . typescript-mode))
+  :hook (typescript-mode . setup-tide-mode)
+  :config
+  (setq typescript-indent-level 2))
+
+(use-package web-mode
+  :ensure t
+  :defer t
+  :mode ("\\.html\\'" . web-mode)
+  :hook (web-mode . setup-tide-mode)
+  :config
+  (flycheck-add-mode 'typescript-tslint 'web-mode)
+  (setq web-mode-markup-indent-offset 2
+        web-mode-code-indent-offset   2
+        web-mode-css-indent-offset    2))
+
+(use-package rjsx-mode
+  :ensure t
+  :defer t
+  :mode "components\\/.*\\.js\\'")
+
+(use-package js2-mode
+  :ensure t
+  :mode "\\.js\\'"
+  :interpreter "node"
+  :config
+  (setq js2-basic-offset 2))
+
+(use-package xref-js2
+  :ensure t
+  :after js2-mode
+  :config
+  (define-key js2-mode-map (kbd "M-.") nil)
+  (add-hook 'js2-mode-hook
+            (lambda () (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)))
+  (setq xref-js2-search-program 'rg)
+  (define-key js2-mode-map (kbd "M-.") 'xref-find-definitions)
+  (define-key js2-mode-map (kbd "M-,") 'xref-pop-marker-stack))
+
+(use-package import-js
+  :ensure t
+  :hook ((js-mode . run-import-js)
+         (typescript-mode . run-import-js))
+  :config
+  (defun run-import-js ()
+    (add-hook 'after-save-hook 'import-js-fix nil t)))
+#+end_src
+
+* Environment
+
+#+begin_src emacs-lisp
+(use-package envrc
+  :ensure t
+  :config
+  (envrc-global-mode))
+#+end_src
+
+* Navigation and Help
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+#+end_src
+
+* Version Control
+
+** diff-hl
+
+#+begin_src emacs-lisp
+(use-package diff-hl
+  :ensure t
+  :config
+  (global-diff-hl-mode))
+#+end_src
+
+** Magit
+
+#+begin_src emacs-lisp
+(use-package magit
+  :ensure t
+  :defer t
+  :init
+  (setq magit-blame-echo-style 'headings)
+  :bind
+  (("C-c g b" . magit-blame)
+   ("C-c g s" . magit))
+  :hook
+  ((magit-pre-refresh  . diff-hl-magit-pre-refresh)
+   (magit-post-refresh . diff-hl-magit-post-refresh)))
+#+end_src
+
+** Git Commit
+
+#+begin_src emacs-lisp
+(require 'git-commit)
+(add-to-list 'auto-mode-alist '("/COMMIT_EDITMSG\\'" . git-commit-mode))
+(add-to-list 'auto-mode-alist '("/MERGE_MSG\\'" . git-commit-mode))
+(setq git-commit-summary-max-length 50)
+(setq git-commit-fill-column 72)
+(add-hook 'git-commit-mode-hook
+          (lambda ()
+            (setq fill-column 72)
+            (display-fill-column-indicator-mode 1)))
+#+end_src
+
+* Search
+
+#+begin_src emacs-lisp
+(use-package rg
+  :ensure t
+  :bind
+  ("C-c r r" . rg))
+#+end_src
+
+* Markdown
+
+#+begin_src emacs-lisp
+(add-hook 'markdown-mode-hook
+          (lambda()
+            (local-unset-key (kbd "M-n"))
+            (local-unset-key (kbd "M-p"))))
+#+end_src
+
+* Appearance
+
+#+begin_src emacs-lisp
+(setq custom-safe-themes t)
+
+(cond ((my-system-type-is-darwin)
+       (custom-set-faces
+        '(default ((t (:family "JetBrainsMono Nerd Font" :foundry "JB" :slant normal :weight regular :height 140 :width normal))))))
+      (t
+       (custom-set-faces
+        '(default ((t (:family "JetBrainsMono Nerd Font" :foundry "JB" :slant normal :weight regular :height 120 :width normal)))))))
+#+end_src
