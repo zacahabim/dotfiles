@@ -30,8 +30,10 @@
 (setenv "PATH" (concat (concat my-lsp-server-dir "/bin") ":" (getenv "PATH")))
 
 ;; Also set PYTHONPATH for pip --prefix installed packages
-(let ((site-packages (car (file-expand-wildcards
-                           (concat my-lsp-server-dir "/lib/python*/site-packages")))))
+(let ((site-packages (or (car (file-expand-wildcards
+                               (concat my-lsp-server-dir "/lib/python*/site-packages")))
+                         (car (file-expand-wildcards
+                               (concat my-lsp-server-dir "/local/lib/python*/dist-packages"))))))
   (when site-packages
     (setenv "PYTHONPATH" (concat site-packages ":" (or (getenv "PYTHONPATH") "")))))
 
@@ -102,6 +104,26 @@
   (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
   :config
   (global-undo-tree-mode)
+  ;; Clear modified flag when buffer matches file on disk after undo
+  (defun my-check-buffer-modified (buf)
+    "Clear modified flag if BUF content matches the file on disk."
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (let ((file buffer-file-name))
+          (when (and file
+                     (file-exists-p file)
+                     (buffer-modified-p)
+                     (verify-visited-file-modtime (current-buffer)))
+            (when (equal (buffer-string)
+                         (with-temp-buffer
+                           (insert-file-contents file)
+                           (buffer-string)))
+              (set-buffer-modified-p nil)))))))
+  (add-hook 'after-change-functions
+            (lambda (&rest _)
+              (let ((buf (current-buffer)))
+                (when (buffer-file-name buf)
+                  (run-with-idle-timer 0.5 nil #'my-check-buffer-modified buf)))))
   )
 
 ;; ivy mode
@@ -146,13 +168,15 @@
 
 ;; eglot
 (add-hook 'prog-mode-hook 'eglot-ensure)
+(setq eglot-connect-timeout 120)
 ;; configure python-mode to use pyright language
 (require 'eglot)
 (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
 ;; configure go-mode to use gopls
 (add-to-list 'eglot-server-programs '(go-mode . ("gopls")))
 ;; configure robot-mode to use robotframework-lsp
-(add-to-list 'eglot-server-programs '(robot-mode . ("robotframework_ls")))
+(add-to-list 'eglot-server-programs
+             '(robot-mode . ("python3" "-m" "robotframework_ls")))
 ;; configure tramp to use the remote host path
 (with-eval-after-load 'tramp
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path))

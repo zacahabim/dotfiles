@@ -20,7 +20,6 @@ This command does not push erased text to kill-ring."
   (delete-region
    (point)
    (save-excursion (move-end-of-line 1) (point)))
-  (delete-char 1)
 )
 
 (defun my-delete-line-backward ()
