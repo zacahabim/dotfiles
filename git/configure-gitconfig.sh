@@ -4,7 +4,7 @@ set -euo pipefail
 # Defaults
 DEFAULT_NAME="Hieu Nguyen"
 DEFAULT_EMAIL="zacahabim@gmail.com"
-DEFAULT_EDITOR="vim"
+DEFAULT_EDITOR="emacs -nw"
 DEFAULT_LFS="yes"
 DEFAULT_GPG="no"
 
