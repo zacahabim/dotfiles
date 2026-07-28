@@ -1,46 +1,120 @@
-(defun marker-is-point-p (marker)
-  "test if marker is current point"
-  (and (eq (marker-buffer marker) (current-buffer))
-       (= (marker-position marker) (point))))
+;;; global-mark-navigation.el --- VS Code-like go back/forward navigation
 
-(defun push-mark-maybe ()
-  "push mark onto `global-mark-ring' if mark head or tail is not current location"
-  (if (not global-mark-ring) (error "global-mark-ring empty")
-    (unless (or (marker-is-point-p (car global-mark-ring))
-                (marker-is-point-p (car (reverse global-mark-ring))))
-      (push-mark))))
+;; A linear navigation history with a cursor index.
+;; - "Go back" moves earlier in history
+;; - "Go forward" moves later in history
+;; - New jumps truncate forward history (like a browser)
+;; - Significant movements auto-push to history
 
+(defvar my-nav-history '() "List of markers representing navigation history.")
+(defvar my-nav-index -1 "Current position in navigation history.")
+(defvar my-nav-max 100 "Maximum history size.")
+(defvar my-nav--skip-tracking nil "Skip post-command tracking for this command cycle.")
+(defvar my-nav--last-point nil "Last known point for detecting large jumps.")
+(defvar my-nav--last-buffer nil "Last known buffer for detecting buffer switches.")
+(defvar my-nav-distance-threshold 20 "Minimum line distance to count as a significant jump.")
 
-(defun backward-global-mark ()
-  "use `pop-global-mark', pushing current point if not on ring."
+(defun my-nav--push-marker (marker)
+  "Push MARKER onto navigation history, truncating forward history."
+  ;; Don't push duplicates
+  (unless (and (> (length my-nav-history) 0)
+               (>= my-nav-index 0)
+               (let ((top (nth my-nav-index my-nav-history)))
+                 (and (marker-buffer top)
+                      (eq (marker-buffer top) (marker-buffer marker))
+                      (= (marker-position top) (marker-position marker)))))
+    ;; Truncate forward history
+    (when (< my-nav-index (1- (length my-nav-history)))
+      (setq my-nav-history (seq-take my-nav-history (1+ my-nav-index))))
+    ;; Push new marker
+    (setq my-nav-history (append my-nav-history (list marker)))
+    ;; Trim if too long
+    (when (> (length my-nav-history) my-nav-max)
+      (setq my-nav-history (seq-drop my-nav-history 1)))
+    (setq my-nav-index (1- (length my-nav-history)))))
+
+(defun my-nav-push ()
+  "Push current position onto navigation history."
   (interactive)
-  (push-mark-maybe)
-  (when (marker-is-point-p (car global-mark-ring))
-    (call-interactively 'pop-global-mark))
-  (call-interactively 'pop-global-mark))
+  (my-nav--push-marker (point-marker)))
 
-(defun forward-global-mark ()
-  "hack `pop-global-mark' to go in reverse, pushing current point if not on ring."
+(defun my-nav-go-back ()
+  "Go back in navigation history."
   (interactive)
-  (push-mark-maybe)
-  (setq global-mark-ring (nreverse global-mark-ring))
-  (when (marker-is-point-p (car global-mark-ring))
-    (call-interactively 'pop-global-mark))
-  (call-interactively 'pop-global-mark)
-  (setq global-mark-ring (nreverse global-mark-ring)))
+  (setq my-nav--skip-tracking t)
+  (if (or (null my-nav-history) (<= my-nav-index 0))
+      (message "No earlier position in history")
+    ;; If at the head, push current position so we can come forward to it
+    (when (= my-nav-index (1- (length my-nav-history)))
+      (my-nav--push-marker (point-marker)))
+    (setq my-nav-index (1- my-nav-index))
+    (my-nav--goto (nth my-nav-index my-nav-history))))
 
-;; Push to global-mark-ring before xref jumps
-(defun my-push-mark-before-xref (&rest _)
-  "Push current position to global-mark-ring before xref navigation."
-  (push-mark nil t))
+(defun my-nav-go-forward ()
+  "Go forward in navigation history."
+  (interactive)
+  (setq my-nav--skip-tracking t)
+  (if (or (null my-nav-history)
+          (>= my-nav-index (1- (length my-nav-history))))
+      (message "No later position in history")
+    (setq my-nav-index (1+ my-nav-index))
+    (my-nav--goto (nth my-nav-index my-nav-history))))
 
-(advice-add 'xref-find-definitions :before #'my-push-mark-before-xref)
-(advice-add 'xref-find-references :before #'my-push-mark-before-xref)
-(advice-add 'xref-go-back :before #'my-push-mark-before-xref)
-(advice-add 'xref-go-forward :before #'my-push-mark-before-xref)
-(advice-add 'xref-goto-xref :before #'my-push-mark-before-xref)
+(defun my-nav--goto (marker)
+  "Jump to MARKER."
+  (when (and marker (marker-buffer marker))
+    (switch-to-buffer (marker-buffer marker))
+    (goto-char (marker-position marker))))
 
-(global-set-key (kbd "C-c o") (quote backward-global-mark))
-(global-set-key (kbd "C-c i") (quote forward-global-mark))
+;; --- Auto-push on significant movements ---
+
+(defun my-nav--post-command ()
+  "Track position changes after each command; push on significant jumps."
+  (if my-nav--skip-tracking
+      ;; Reset tracking state to current position (don't detect the nav jump as a movement)
+      (progn
+        (setq my-nav--skip-tracking nil)
+        (setq my-nav--last-point (point)
+              my-nav--last-buffer (current-buffer)))
+    ;; Normal tracking
+    (let ((buf (current-buffer))
+          (pt (point)))
+      (when (and my-nav--last-buffer
+                 (or
+                  ;; Buffer changed
+                  (not (eq buf my-nav--last-buffer))
+                  ;; Large line distance in same buffer
+                  (and my-nav--last-point
+                       (eq buf my-nav--last-buffer)
+                       (> (abs (- (line-number-at-pos pt)
+                                  (line-number-at-pos my-nav--last-point)))
+                          my-nav-distance-threshold))))
+        ;; Push the previous position
+        (when (buffer-live-p my-nav--last-buffer)
+          (let ((marker (make-marker)))
+            (set-marker marker (or my-nav--last-point (point-min)) my-nav--last-buffer)
+            (my-nav--push-marker marker))))
+      (setq my-nav--last-point pt
+            my-nav--last-buffer buf))))
+
+(add-hook 'post-command-hook #'my-nav--post-command)
+
+;; --- Push before xref and other jump commands ---
+
+(defun my-nav-push-before-jump (&rest _)
+  "Push current position before a jump command."
+  (unless my-nav--skip-tracking
+    (my-nav-push)))
+
+(advice-add 'xref-find-definitions :before #'my-nav-push-before-jump)
+(advice-add 'xref-find-references :before #'my-nav-push-before-jump)
+(advice-add 'xref-goto-xref :before #'my-nav-push-before-jump)
+(advice-add 'imenu :before #'my-nav-push-before-jump)
+(advice-add 'beginning-of-buffer :before #'my-nav-push-before-jump)
+(advice-add 'end-of-buffer :before #'my-nav-push-before-jump)
+
+;; Keybindings
+(global-set-key (kbd "C-c o") #'my-nav-go-back)
+(global-set-key (kbd "C-c i") #'my-nav-go-forward)
 
 (provide 'global-mark-navigation)
