@@ -74,6 +74,22 @@ Local LSP server directory managed by Emacs. Install servers with:
 (global-auto-revert-mode 1)
 (delete-selection-mode 1)
 
+;; Half-page scrolling for C-v and M-v
+(defun my-scroll-half-page-down ()
+  "Scroll down half a page."
+  (interactive)
+  (let ((lines (/ (window-body-height) 2)))
+    (scroll-up lines)))
+
+(defun my-scroll-half-page-up ()
+  "Scroll up half a page."
+  (interactive)
+  (let ((lines (/ (window-body-height) 2)))
+    (scroll-down lines)))
+
+(global-set-key (kbd "C-v") #'my-scroll-half-page-down)
+(global-set-key (kbd "M-v") #'my-scroll-half-page-up)
+
 ;; Make bracketed paste (Cmd+v in terminal) respect delete-selection-mode
 (advice-add 'xterm-paste :around
             (lambda (orig-fn &rest args)
@@ -161,8 +177,8 @@ Works regardless of TERM value, through tmux and SSH.
 
 (set-face-attribute 'menu nil
                     :inverse-video nil
-                    :background "pink"
-                    :foreground "blue"
+                    :background "#403e41"
+                    :foreground "#ffd866"
                     :bold t)
 #+end_src
 
