@@ -1,5 +1,5 @@
-#+TITLE: Hieu's Emacs Configuration
-#+AUTHOR: Hieu Nguyen
+#+TITLE: Zoïe's Emacs Configuration
+#+AUTHOR: Zoïe Street
 #+PROPERTY: header-args:emacs-lisp :tangle yes
 
 * Package Management
@@ -69,6 +69,13 @@ Local LSP server directory managed by Emacs. Install servers with:
 (xterm-mouse-mode)
 (global-auto-revert-mode 1)
 (delete-selection-mode 1)
+
+;; Make bracketed paste (Cmd+v in terminal) respect delete-selection-mode
+(advice-add 'xterm-paste :around
+            (lambda (orig-fn &rest args)
+              (when (and delete-selection-mode (use-region-p))
+                (delete-region (region-beginning) (region-end)))
+              (apply orig-fn args)))
 #+end_src
 
 * Utility Functions

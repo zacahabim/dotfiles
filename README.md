@@ -1,4 +1,4 @@
-# Hieu's dotfiles
+# Zoïe Street's dotfiles
 
 ## Issues
 
