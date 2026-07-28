@@ -233,7 +233,13 @@ Works regardless of TERM value, through tmux and SSH.
    ("<f6>" . ivy-resume)
    ("C-c f f" . counsel-file-jump)
    ("C-c g f" . counsel-git)
-   ("C-c g g" . vc-git-grep)))
+   ("C-c g g" . my-git-grep)))
+
+(defun my-git-grep (pattern)
+  "Run git grep for PATTERN from the git root on all tracked files."
+  (interactive "sGit grep: ")
+  (let ((root (string-trim (shell-command-to-string "git rev-parse --show-toplevel"))))
+    (vc-git-grep pattern "*" root)))
 #+end_src
 
 ** Corfu
@@ -470,8 +476,15 @@ Works regardless of TERM value, through tmux and SSH.
 #+begin_src emacs-lisp
 (use-package rg
   :ensure t
+  :config
+  (rg-define-search rg-project-all
+    "Search all files in the git project root."
+    :query ask
+    :format regexp
+    :files "everything"
+    :dir project)
   :bind
-  ("C-c r r" . rg))
+  ("C-c r r" . rg-project-all))
 #+end_src
 
 * Markdown

@@ -28,7 +28,7 @@ buffer in current window."
                 (no-delete-other-windows . nil))))
 
 (add-to-list 'display-buffer-alist
-             '("\\*\\(Backtrace\\|Compile-log\\|Messages\\|Warnings\\|grep\\|scratch\\)\\*"
+             '("\\*\\(Backtrace\\|Compile-log\\|Messages\\|Warnings\\|grep\\|scratch\\|xref\\|compilation\\|rg\\)\\*"
                (display-buffer-in-side-window)
                (side . bottom)
                (slot . 0)
