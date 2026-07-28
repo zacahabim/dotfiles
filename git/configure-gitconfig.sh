@@ -5,8 +5,8 @@ set -euo pipefail
 DEFAULT_NAME="Hieu Nguyen"
 DEFAULT_EMAIL="zacahabim@gmail.com"
 DEFAULT_EDITOR="emacs -nw"
-DEFAULT_LFS="yes"
-DEFAULT_GPG="no"
+DEFAULT_LFS="y"
+DEFAULT_GPG="n"
 
 OUTPUT="$HOME/.gitconfig"
 ALIAS_PATH=".gitalias.txt"
@@ -63,8 +63,8 @@ if [[ "${1:-}" == "-m" ]]; then
     prompt NAME "Name" "$DEFAULT_NAME"
     prompt_email EMAIL
     prompt EDITOR_CMD "Editor" "$DEFAULT_EDITOR"
-    prompt USE_LFS "Configure git lfs? [yes/no]" "$DEFAULT_LFS"
-    prompt USE_GPG "Configure gpg signing? [yes/no]" "$DEFAULT_GPG"
+    prompt USE_LFS "Configure git lfs?" "$DEFAULT_LFS"
+    prompt USE_GPG "Configure gpg signing?" "$DEFAULT_GPG"
 else
     NAME="$DEFAULT_NAME"
     EMAIL="$DEFAULT_EMAIL"
@@ -77,7 +77,7 @@ CONTENT="[user]
 	email = $EMAIL
 	name = $NAME"
 
-if [[ "$USE_GPG" == "yes" ]]; then
+if [[ "$USE_GPG" =~ ^[Yy]$ ]]; then
     if [[ "${1:-}" == "-m" ]]; then
         mapfile -t GPG_KEYS < <(gpg --list-secret-keys --keyid-format long 2>/dev/null | grep '^sec' | sed 's|.*/||;s| .*||')
         if [[ ${#GPG_KEYS[@]} -eq 0 ]]; then
@@ -106,7 +106,7 @@ CONTENT+="
 	editor = $EDITOR_CMD
 	hooksPath = ~/.git-hooks"
 
-if [[ "$USE_LFS" == "yes" ]]; then
+if [[ "$USE_LFS" =~ ^[Yy]$ ]]; then
     CONTENT+="
 [filter \"lfs\"]
 	clean = git-lfs clean -- %f
@@ -115,7 +115,7 @@ if [[ "$USE_LFS" == "yes" ]]; then
 	required = true"
 fi
 
-if [[ "$USE_GPG" == "yes" ]]; then
+if [[ "$USE_GPG" =~ ^[Yy]$ ]]; then
     CONTENT+="
 [gpg]
 	program = gpg
@@ -132,7 +132,7 @@ echo "--- Preview of $OUTPUT ---"
 echo "$CONTENT"
 echo "---"
 echo ""
-read -rp "Write to $OUTPUT? [y/N]: " confirm
+read -rp "Write to $OUTPUT? (n): " confirm
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
     echo "$CONTENT" > "$OUTPUT"
     cp "$(dirname "$0")/.gitalias.txt" "$HOME/.gitalias.txt"
