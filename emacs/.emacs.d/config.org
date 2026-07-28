@@ -5,6 +5,10 @@
 * Package Management
 
 #+begin_src emacs-lisp
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
@@ -303,6 +307,15 @@ Works regardless of TERM value, through tmux and SSH.
   :defer t
   :mode ("\\.robot\\'" . robot-mode)
   :hook (robot-mode . eglot-ensure))
+#+end_src
+
+** YAML
+
+#+begin_src emacs-lisp
+(use-package yaml-mode
+  :ensure t
+  :defer t
+  :mode ("\\.ya?ml\\'" . yaml-mode))
 #+end_src
 
 ** TypeScript / JavaScript
