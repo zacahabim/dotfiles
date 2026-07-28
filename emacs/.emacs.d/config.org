@@ -126,6 +126,29 @@ Toggle display of =*xref*=, =*grep*=, =*rg*=, =*compilation*= buffers.
 (global-set-key (kbd "C-c x") #'my-toggle-results-buffer)
 #+end_src
 
+** Close Popup Window
+
+Close any visible popup/side window (Help, Compile-log, etc.) without leaving your current window.
+
+#+begin_src emacs-lisp
+(defun my-close-popup-window ()
+  "Close the first non-selected side/popup window found."
+  (interactive)
+  (let ((closed nil))
+    (dolist (win (window-list))
+      (unless (or closed (eq win (selected-window)))
+        (when (or (window-parameter win 'window-side)
+                  (member (buffer-name (window-buffer win))
+                          '("*Help*" "*Backtrace*" "*Compile-Log*"
+                            "*Warnings*" "*Messages*" "*Command History*")))
+          (quit-window nil win)
+          (setq closed t))))
+    (unless closed
+      (message "No popup window to close."))))
+
+(global-set-key (kbd "C-c q") #'my-close-popup-window)
+#+end_src
+
 ** Copy File Path
 
 Copy the current file's path relative to git root to clipboard.

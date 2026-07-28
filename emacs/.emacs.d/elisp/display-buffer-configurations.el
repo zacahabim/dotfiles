@@ -28,7 +28,7 @@ buffer in current window."
                 (no-delete-other-windows . nil))))
 
 (add-to-list 'display-buffer-alist
-             '("\\*\\(Backtrace\\|Compile-log\\|Messages\\|Warnings\\|grep\\|scratch\\|xref\\|compilation\\|rg\\)\\*"
+             '("\\*\\(grep\\|scratch\\|xref\\|compilation\\|rg\\)\\*"
                (display-buffer-in-side-window)
                (side . bottom)
                (slot . 0)
@@ -37,7 +37,7 @@ buffer in current window."
                 (no-delete-other-windows . nil))))
 
 (add-to-list 'display-buffer-alist
-             '("\\*\\([Hh]elp\\|Command History\\|command-log\\)\\*"
+             '("\\*\\([Hh]elp\\|Backtrace\\|Compile-[Ll]og\\|Warnings\\|Messages\\|Command History\\|command-log\\)\\*"
                (display-buffer-in-side-window)
                (side . right)
                (slot . 0)
