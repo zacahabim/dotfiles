@@ -113,8 +113,10 @@
 (advice-add 'beginning-of-buffer :before #'my-nav-push-before-jump)
 (advice-add 'end-of-buffer :before #'my-nav-push-before-jump)
 
-;; Keybindings
-(global-set-key (kbd "C-c o") #'my-nav-go-back)
-(global-set-key (kbd "C-c i") #'my-nav-go-forward)
+;; Keybindings: C-o/C-i for navigation, move defaults to C-c o/C-c i
+(global-set-key (kbd "C-o") #'my-nav-go-back)
+(global-set-key (kbd "C-i") #'my-nav-go-forward)
+(global-set-key (kbd "C-c o") #'open-line)
+(global-set-key (kbd "C-c i") #'indent-for-tab-command)
 
 (provide 'global-mark-navigation)
