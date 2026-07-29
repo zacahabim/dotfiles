@@ -14,6 +14,29 @@
 (package-initialize)
 #+end_src
 
+* Startup Performance
+
+Restore GC threshold after startup (early-init.el sets it to 1GB).
+Use stapelberg's trick: run GC when Emacs loses focus, so pauses are invisible.
+
+#+begin_src emacs-lisp
+;; Restore a reasonable GC threshold after startup completes.
+;; 16MB is generous for normal editing but won't hog memory.
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 16 1024 1024))
+            (message "Emacs ready in %.2fs with %d GCs."
+                     (float-time (time-subtract after-init-time before-init-time))
+                     gcs-done)))
+
+;; Stapelberg's trick: GC when Emacs loses focus — pauses become invisible.
+(add-function :after after-focus-change-function
+              (lambda () (unless (frame-focus-state) (garbage-collect))))
+
+;; Also GC during long idle periods.
+(run-with-idle-timer 5 t #'garbage-collect)
+#+end_src
+
 * Paths and LSP Servers
 
 #+begin_src emacs-lisp
@@ -60,7 +83,7 @@ Local LSP server directory managed by Emacs. Install servers with:
 
 #+begin_src emacs-lisp
 (require 'sensible-defaults)
-(sensible-defaults/increase-gc-threshold)
+;; GC threshold is managed by early-init.el + Startup Performance section.
 (sensible-defaults/show-matching-parens)
 (sensible-defaults/use-all-keybindings)
 (sensible-defaults/treat-camelcase-as-separate-words)
@@ -210,6 +233,7 @@ Works regardless of TERM value, through tmux and SSH.
 #+begin_src emacs-lisp
 (use-package undo-tree
   :ensure t
+  :defer 1
   :init
   (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
   :config
@@ -242,7 +266,8 @@ Works regardless of TERM value, through tmux and SSH.
 
 #+begin_src emacs-lisp
 (use-package counsel
-  :ensure t)
+  :ensure t
+  :defer t)
 
 (use-package ivy
   :ensure t
@@ -304,6 +329,7 @@ Works regardless of TERM value, through tmux and SSH.
 #+begin_src emacs-lisp
 (use-package company
   :ensure t
+  :defer 3
   :config
   (global-company-mode))
 #+end_src
@@ -313,14 +339,15 @@ Works regardless of TERM value, through tmux and SSH.
 ** Eglot (LSP)
 
 #+begin_src emacs-lisp
-(add-hook 'prog-mode-hook 'eglot-ensure)
 (setq eglot-connect-timeout 120)
 
-(require 'eglot)
-(add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
-(add-to-list 'eglot-server-programs '(go-mode . ("gopls")))
-(add-to-list 'eglot-server-programs
-             '(robot-mode . ("python3" "-m" "robotframework_ls")))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
+  (add-to-list 'eglot-server-programs '(go-mode . ("gopls")))
+  (add-to-list 'eglot-server-programs
+               '(robot-mode . ("python3" "-m" "robotframework_ls"))))
+
+(add-hook 'prog-mode-hook 'eglot-ensure)
 
 (with-eval-after-load 'tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
@@ -440,6 +467,7 @@ Works regardless of TERM value, through tmux and SSH.
 #+begin_src emacs-lisp
 (use-package envrc
   :ensure t
+  :defer 2
   :config
   (envrc-global-mode))
 #+end_src
@@ -449,6 +477,7 @@ Works regardless of TERM value, through tmux and SSH.
 #+begin_src emacs-lisp
 (use-package which-key
   :ensure t
+  :defer 3
   :config
   (which-key-mode))
 #+end_src
@@ -460,6 +489,7 @@ Works regardless of TERM value, through tmux and SSH.
 #+begin_src emacs-lisp
 (use-package diff-hl
   :ensure t
+  :defer 2
   :config
   (global-diff-hl-mode))
 #+end_src
@@ -483,15 +513,29 @@ Works regardless of TERM value, through tmux and SSH.
 ** Git Commit
 
 #+begin_src emacs-lisp
-(require 'git-commit)
-(add-to-list 'auto-mode-alist '("/COMMIT_EDITMSG\\'" . git-commit-mode))
-(add-to-list 'auto-mode-alist '("/MERGE_MSG\\'" . git-commit-mode))
-(setq git-commit-summary-max-length 50)
-(setq git-commit-fill-column 72)
-(add-hook 'git-commit-mode-hook
-          (lambda ()
-            (setq fill-column 72)
-            (display-fill-column-indicator-mode 1)))
+;; git-commit enables global-git-commit-mode on load (adds to find-file-hook).
+;; Defer loading until we actually visit a commit message file.
+(defun my-git-commit-setup-maybe ()
+  "Load git-commit when visiting a commit/merge message file."
+  (when (and buffer-file-name
+             (string-match-p
+              "\\(COMMIT_EDITMSG\\|MERGE_MSG\\|PULLREQ_EDITMSG\\|TAG_EDITMSG\\)\\'"
+              buffer-file-name))
+    (require 'git-commit)
+    ;; Remove ourselves — global-git-commit-mode now handles it.
+    (remove-hook 'find-file-hook #'my-git-commit-setup-maybe)
+    ;; Re-run the hook that git-commit just installed.
+    (git-commit-setup-check-buffer)))
+
+(add-hook 'find-file-hook #'my-git-commit-setup-maybe)
+
+(with-eval-after-load 'git-commit
+  (setq git-commit-summary-max-length 50)
+  (setq git-commit-fill-column 72)
+  (add-hook 'git-commit-mode-hook
+            (lambda ()
+              (setq fill-column 72)
+              (display-fill-column-indicator-mode 1))))
 #+end_src
 
 * Search
@@ -499,15 +543,15 @@ Works regardless of TERM value, through tmux and SSH.
 #+begin_src emacs-lisp
 (use-package rg
   :ensure t
+  :defer t
+  :bind ("C-c r r" . rg-project-all)
   :config
   (rg-define-search rg-project-all
     "Search all files in the git project root."
     :query ask
     :format regexp
     :files "everything"
-    :dir project)
-  :bind
-  ("C-c r r" . rg-project-all))
+    :dir project))
 #+end_src
 
 * Markdown
