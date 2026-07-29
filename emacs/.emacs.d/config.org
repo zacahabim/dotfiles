@@ -513,10 +513,28 @@ Works regardless of TERM value, through tmux and SSH.
 * Markdown
 
 #+begin_src emacs-lisp
-(add-hook 'markdown-mode-hook
-          (lambda()
-            (local-unset-key (kbd "M-n"))
-            (local-unset-key (kbd "M-p"))))
+(use-package markdown-mode
+  :ensure t
+  :defer t
+  :mode (("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode)
+         ("README\\.md\\'" . gfm-mode))
+  :custom
+  (markdown-command "pandoc")
+  (markdown-enable-math t)
+  (markdown-fontify-code-blocks-natively t)
+  (markdown-header-scaling t)
+  (markdown-indent-on-enter 'indent-and-new-item)
+  (markdown-asymmetric-header t)
+  (markdown-gfm-use-electric-backquote nil)
+  :hook (markdown-mode . (lambda ()
+                           (visual-line-mode 1)
+                           (flyspell-mode 1)
+                           (local-unset-key (kbd "M-n"))
+                           (local-unset-key (kbd "M-p"))))
+  :bind (:map markdown-mode-map
+              ("C-c C-e" . markdown-export)
+              ("C-c C-o" . markdown-follow-thing-at-point)))
 #+end_src
 
 * Appearance
