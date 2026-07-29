@@ -170,6 +170,9 @@ Local LSP server directory managed by Emacs. Install servers with:
   "Expand region at click position. Reset if clicking outside current selection."
   (interactive "e")
   (let ((click-pos (posn-point (event-start event))))
+    ;; Clear secondary selection overlay if it exists
+    (when (and (boundp 'mouse-secondary-overlay) mouse-secondary-overlay)
+      (delete-overlay mouse-secondary-overlay))
     ;; If clicking outside current selection, move there and start fresh
     (when (or (not (use-region-p))
               (not (<= (region-beginning) click-pos (region-end))))
@@ -178,7 +181,8 @@ Local LSP server directory managed by Emacs. Install servers with:
     (er/expand-region 1)))
 
 (global-set-key [M-mouse-1] #'my-mouse-expand-region)
-(global-set-key [M-down-mouse-1] #'ignore)
+(global-set-key [M-down-mouse-1] (lambda (event) (interactive "e") nil)
+)
 #+end_src
 
 * Utility Functions
