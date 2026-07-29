@@ -119,6 +119,66 @@ Local LSP server directory managed by Emacs. Install servers with:
               (when (and delete-selection-mode (use-region-p))
                 (delete-region (region-beginning) (region-end)))
               (apply orig-fn args)))
+
+;; Mouse selection:
+;; - Double-click: select word (including camelCase, snake_case, kebab-case parts)
+;; - Triple-click: select line (built-in default restored)
+
+;; Make double-click select full compound words (camelCase, snake_case, kebab-case)
+(defun my-word-bounds ()
+  "Return bounds of compound word at point (camelCase, snake_case, kebab-case)."
+  (let ((sym-chars "a-zA-Z0-9_-"))
+    (save-excursion
+      (let ((beg (progn (skip-chars-backward sym-chars) (point)))
+            (end (progn (skip-chars-forward sym-chars) (point))))
+        (when (< beg end)
+          (cons beg end))))))
+
+(put 'my-compound-word 'bounds-of-thing-at-point #'my-word-bounds)
+(setq mouse-select-region-move-to-beginning nil)
+
+(defun my-double-click-word (event)
+  "Select compound word (camelCase, snake_case, kebab-case) on double-click."
+  (interactive "e")
+  (mouse-set-point event)
+  (let ((bounds (my-word-bounds)))
+    (when bounds
+      (goto-char (car bounds))
+      (set-mark (point))
+      (goto-char (cdr bounds)))))
+
+(global-set-key [double-mouse-1] #'my-double-click-word)
+
+;; Triple-click: select whole line
+(defun my-select-line (event)
+  "Select the entire current line including newline."
+  (interactive "e")
+  (mouse-set-point event)
+  (beginning-of-line)
+  (set-mark (point))
+  (forward-line 1))
+
+(global-set-key [triple-mouse-1] #'my-select-line)
+
+;; Expand region: progressively expand selection (word → string → brackets → defun)
+(use-package expand-region
+  :ensure t
+  :bind ("M-=" . er/expand-region))
+
+;; M-click: expand region at click position, reset if clicking outside current selection
+(defun my-mouse-expand-region (event)
+  "Expand region at click position. Reset if clicking outside current selection."
+  (interactive "e")
+  (let ((click-pos (posn-point (event-start event))))
+    ;; If clicking outside current selection, move there and start fresh
+    (when (or (not (use-region-p))
+              (not (<= (region-beginning) click-pos (region-end))))
+      (deactivate-mark)
+      (goto-char click-pos))
+    (er/expand-region 1)))
+
+(global-set-key [M-mouse-1] #'my-mouse-expand-region)
+(global-set-key [M-down-mouse-1] #'ignore)
 #+end_src
 
 * Utility Functions
