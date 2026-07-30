@@ -124,6 +124,16 @@ Local LSP server directory managed by Emacs. Install servers with:
                 (delete-region (region-beginning) (region-end)))
               (apply orig-fn args)))
 
+;; Isearch: use active region as initial search text
+(defun my-isearch-with-region ()
+  "If region is active, use it as the initial isearch string."
+  (when (use-region-p)
+    (let ((text (buffer-substring-no-properties (region-beginning) (region-end))))
+      (deactivate-mark)
+      (isearch-yank-string text))))
+
+(add-hook 'isearch-mode-hook #'my-isearch-with-region)
+
 ;; Mouse selection:
 ;; - Double-click: select word (including camelCase, snake_case, kebab-case parts)
 ;; - Triple-click: select line (built-in default restored)
