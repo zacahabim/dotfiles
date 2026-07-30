@@ -134,6 +134,72 @@ Local LSP server directory managed by Emacs. Install servers with:
 
 (add-hook 'isearch-mode-hook #'my-isearch-with-region)
 
+;; Isearch: C-w grabs compound word at point first, then expands in search direction
+(defvar isearch-cw--active nil)
+(defvar isearch-cw--start nil)
+(defvar isearch-cw--end nil)
+
+(defun isearch-cw--reset ()
+  "Reset C-w state when isearch ends."
+  (setq isearch-cw--active nil))
+(add-hook 'isearch-mode-end-hook #'isearch-cw--reset)
+
+(defun isearch-yank-compound-word-then-words ()
+  "First C-w: replace search with compound word at point (snake_case, camelCase, kebab-case).
+Subsequent C-w: expand in search direction (forward after C-s, backward after C-r)."
+  (interactive)
+  (if isearch-cw--active
+      ;; Subsequent presses: expand in search direction
+      (if isearch-forward
+          ;; Forward: append next word
+          (let ((word (save-excursion
+                        (goto-char isearch-cw--end)
+                        (let ((beg (point)))
+                          (skip-chars-forward " \t\n\r")
+                          (forward-word)
+                          (buffer-substring-no-properties beg (point))))))
+            (setq isearch-cw--end (+ isearch-cw--end (length word)))
+            (setq isearch-string (concat isearch-string word))
+            (setq isearch-message isearch-string)
+            (goto-char isearch-cw--end)
+            (setq isearch-other-end isearch-cw--start)
+            (isearch-update))
+        ;; Backward: prepend previous word
+        (let ((word (save-excursion
+                      (goto-char isearch-cw--start)
+                      (let ((end (point)))
+                        (skip-chars-backward " \t\n\r")
+                        (backward-word)
+                        (buffer-substring-no-properties (point) end)))))
+          (setq isearch-cw--start (- isearch-cw--start (length word)))
+          (setq isearch-string (concat word isearch-string))
+          (setq isearch-message isearch-string)
+          (setq isearch-other-end isearch-cw--end)
+          (goto-char isearch-cw--start)
+          (isearch-update)))
+    ;; First press: grab compound word at point and stay
+    (let* ((origin (or isearch-other-end (point)))
+           (bounds (save-excursion
+                     (goto-char origin)
+                     (let ((sym-chars "a-zA-Z0-9_-"))
+                       (skip-chars-backward sym-chars)
+                       (let ((beg (point)))
+                         (skip-chars-forward sym-chars)
+                         (cons beg (point))))))
+           (text (buffer-substring-no-properties (car bounds) (cdr bounds))))
+      (setq isearch-cw--active t)
+      (setq isearch-cw--start (car bounds))
+      (setq isearch-cw--end (cdr bounds))
+      (setq isearch-string text)
+      (setq isearch-message text)
+      (setq isearch-other-end (car bounds))
+      (goto-char (cdr bounds))
+      (isearch-update))))
+
+(define-key isearch-mode-map (kbd "C-w") #'isearch-yank-compound-word-then-words)
+
+
+
 ;; Mouse selection:
 ;; - Double-click: select word (including camelCase, snake_case, kebab-case parts)
 ;; - Triple-click: select line (built-in default restored)
