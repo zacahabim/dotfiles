@@ -97,6 +97,10 @@ Local LSP server directory managed by Emacs. Install servers with:
 (global-auto-revert-mode 1)
 (delete-selection-mode 1)
 
+;; Keep 5 lines of context when cursor reaches edge of window (C-n/C-p)
+(setq scroll-margin 5)
+(setq scroll-conservatively 101)
+
 ;; Half-page scrolling for C-v and M-v
 (defun my-scroll-half-page-down ()
   "Scroll down half a page."
