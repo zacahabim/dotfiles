@@ -446,11 +446,8 @@ If a region is active, its text pre-fills the prompt. Otherwise,
 `C-w' pulls the word at point (isearch-style) from the buffer this
 command was invoked from, one word at a time."
   (interactive
-   (list (let ((region (my-search-prompt-region-or-nil)))
-           (if region
-               (read-string "Git grep: " region)
-             (my-search-prompt-with-word-at-point
-              (read-string "Git grep: "))))))
+   (list (my-search-prompt-with-word-at-point
+          (read-string "Git grep: "))))
   (let ((root (string-trim (shell-command-to-string "git rev-parse --show-toplevel"))))
     (vc-git-grep pattern "*" root)))
 #+end_src
@@ -705,12 +702,13 @@ command was invoked from, one word at a time."
 
 * Search
 
-Search prompts (=my-git-grep=, =rg-project-all=) mirror isearch's
-input conveniences (see =search-prompt-word-at-point.el=): if a
-region is active, its text pre-fills the prompt; otherwise, =C-w=
-pulls the word at point from the buffer the search was started from,
-one word at a time on repeated presses. Normal minibuffer =C-w=
-(kill-region) is unaffected everywhere else.
+Search prompts (=my-git-grep=, =rg-project-all=, =query-replace='s
+"from" prompt on =M-%=/=C-M-%=) mirror isearch's input conveniences
+(see =search-prompt-word-at-point.el=): if a region is active, its
+text pre-fills the prompt; otherwise, =C-w= pulls the word at point
+from the buffer the search was started from, one word at a time on
+repeated presses. Normal minibuffer =C-w= (kill-region) is
+unaffected everywhere else.
 
 #+begin_src emacs-lisp
 (use-package rg
@@ -728,16 +726,20 @@ one word at a time on repeated presses. Normal minibuffer =C-w=
   ;; search-prompt-word-at-point.el): pre-fill from an active region
   ;; if there is one, otherwise fall back to isearch-style `C-w'
   ;; word-at-point yanking, same as `my-git-grep'.
-  (advice-add 'rg-read-pattern :filter-args
-              (lambda (args)
-                (let ((region (my-search-prompt-region-or-nil)))
-                  (if region
-                      (list (car args) region)
-                    args))))
   (advice-add 'rg-read-pattern :around
               (lambda (fn &rest args)
                 (my-search-prompt-with-word-at-point
                  (apply fn args)))))
+
+;; `M-%' (query-replace) and `C-M-%' (query-replace-regexp) both read
+;; their "from" argument through `query-replace-read-from'. Give that
+;; prompt the same isearch-style region pre-fill and `C-w'
+;; word-at-point yanking as `my-git-grep'/`rg-read-pattern' (see
+;; search-prompt-word-at-point.el).
+(advice-add 'query-replace-read-from :around
+            (lambda (fn &rest args)
+              (my-search-prompt-with-word-at-point
+               (apply fn args))))
 #+end_src
 
 * Markdown

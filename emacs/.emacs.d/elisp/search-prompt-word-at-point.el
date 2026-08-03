@@ -12,9 +12,10 @@
 ;;   identifiers are grabbed whole). Subsequent presses extend forward
 ;;   word-by-word (or char-by-char across other punctuation/
 ;;   whitespace), same idea as isearch's own repeated `C-w'.
-;; Only active for prompts explicitly wrapped with
-;; `my-search-prompt-with-word-at-point', so normal minibuffer `C-w'
-;; (kill-region) and empty prompts elsewhere are unaffected.
+;; Both conveniences are automatic for any prompt wrapped with
+;; `my-search-prompt-with-word-at-point' -- no cooperation needed from
+;; the read primitive it wraps. Normal minibuffer `C-w' (kill-region)
+;; and unrelated prompts elsewhere are unaffected.
 
 (defvar my-search-prompt--source-buffer nil
   "Buffer the current search prompt was invoked from.")
@@ -76,15 +77,42 @@ newline, since these prompts take a single-line pattern."
   "Non-nil while a `my-search-prompt-with-word-at-point' form is reading
 from the minibuffer, so the setup hook knows to bind `C-w'.")
 
+(defvar my-search-prompt--prefill nil
+  "Text to pre-fill the minibuffer with (selected, so typing replaces
+it), or nil. Set from the active region by
+`my-search-prompt-with-word-at-point'.")
+
 (defun my-search-prompt--minibuffer-setup ()
   "Locally bind `C-w' to isearch-style word-at-point yanking, without
-touching `minibuffer-local-map' globally or for other prompts."
+touching `minibuffer-local-map' globally or for other prompts. Also
+pre-fills the prompt from `my-search-prompt--prefill', selected so
+typing replaces it, mirroring isearch's own region-start behavior."
   (when my-search-prompt--active
     (use-local-map
      (let ((map (make-sparse-keymap)))
        (set-keymap-parent map (current-local-map))
        (define-key map (kbd "C-w") #'my-search-prompt-yank-word-at-point)
-       map))))
+       map))
+    (when my-search-prompt--prefill
+      ;; Insert after the (read-only) prompt field, not at `point-min'
+      ;; itself -- the prompt text occupies a read-only field starting
+      ;; at `point-min', so `field-end' there is the first editable
+      ;; position.
+      (let ((start (field-end (point-min))))
+        (goto-char start)
+        (insert my-search-prompt--prefill)
+        ;; Point is now after the inserted text; mark it there, then
+        ;; move point back to the start, so the whole prefill is the
+        ;; region (isearch/`M-n'-style: typing replaces the selection).
+        (set-mark (point))
+        (goto-char start)
+        (activate-mark))
+      ;; A region pre-fill counts as the first `C-w' pull: further
+      ;; presses should extend forward from it, not re-grab the word.
+      (setq my-search-prompt--first-pull-done t)
+      ;; Only pre-fill once, in case this hook runs again for the same
+      ;; prompt (e.g. `read-from-minibuffer' recursion).
+      (setq my-search-prompt--prefill nil))))
 
 (add-hook 'minibuffer-setup-hook #'my-search-prompt--minibuffer-setup)
 
@@ -95,17 +123,18 @@ touching `minibuffer-local-map' globally or for other prompts."
 
 (defmacro my-search-prompt-with-word-at-point (&rest body)
   "Run BODY (a minibuffer-reading form, e.g. `read-string' or
-`read-regexp') with `C-w' locally bound to pull the word at point
-from the buffer BODY was invoked from, isearch-style, instead of the
-default kill-region. Has no effect on the prompt's initial input --
-combine with `my-search-prompt-region-or-nil' at the call site to
-pre-fill from an active region, mirroring isearch's own behavior.
-Works regardless of which read primitive BODY uses internally, since
-the `C-w' binding hooks `minibuffer-setup-hook' rather than depending
-on an explicit keymap argument."
+`read-regexp') with isearch-like input conveniences: if a region is
+active in the buffer BODY is invoked from, its text pre-fills the
+prompt (selected, so typing replaces it); otherwise `C-w' pulls the
+word at point from that buffer, isearch-style, instead of the
+default kill-region. Works regardless of which read primitive BODY
+uses internally, since both behaviors hook `minibuffer-setup-hook'
+rather than depending on an explicit keymap or initial-input
+argument."
   `(let* ((my-search-prompt--source-buffer (current-buffer))
           (my-search-prompt--source-point (point))
           (my-search-prompt--first-pull-done nil)
+          (my-search-prompt--prefill (my-search-prompt-region-or-nil))
           (my-search-prompt--active t))
      ,@body))
 
