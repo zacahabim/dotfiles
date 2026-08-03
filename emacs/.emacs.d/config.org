@@ -77,6 +77,7 @@ Local LSP server directory managed by Emacs. Install servers with:
 (require 'dockerfile-mode)
 (require 'display-buffer-configurations)
 (require 'global-mark-navigation)
+(require 'results-buffer-origin)
 #+end_src
 
 * Sensible Defaults
@@ -266,6 +267,17 @@ Subsequent C-w: expand in search direction (forward after C-s, backward after C-
 #+end_src
 
 * Utility Functions
+
+** Jump to Quickfix-style Target Window from Results Buffers
+
+Vim-quickfix-like behavior: selecting a match in =*xref*=, =*grep*=,
+=*rg*=, or =*compilation*= displays the target in the last "normal"
+editing window you focused (see =results-buffer-origin.el=) — kept
+continuously up to date, not just the window the search was started
+from. Switch to a different edit window before picking the next
+match, and results now land there instead. If that window is gone,
+it falls back to normal =display-buffer= behavior, so a new pane can
+still be created or a buffer chosen freely.
 
 ** Toggle Results Buffers
 
