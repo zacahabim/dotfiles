@@ -78,6 +78,7 @@ Local LSP server directory managed by Emacs. Install servers with:
 (require 'display-buffer-configurations)
 (require 'global-mark-navigation)
 (require 'results-buffer-origin)
+(require 'search-prompt-word-at-point)
 #+end_src
 
 * Sensible Defaults
@@ -440,8 +441,16 @@ Works regardless of TERM value, through tmux and SSH.
    ("C-c g g" . my-git-grep)))
 
 (defun my-git-grep (pattern)
-  "Run git grep for PATTERN from the git root on all tracked files."
-  (interactive "sGit grep: ")
+  "Run git grep for PATTERN from the git root on all tracked files.
+If a region is active, its text pre-fills the prompt. Otherwise,
+`C-w' pulls the word at point (isearch-style) from the buffer this
+command was invoked from, one word at a time."
+  (interactive
+   (list (let ((region (my-search-prompt-region-or-nil)))
+           (if region
+               (read-string "Git grep: " region)
+             (my-search-prompt-with-word-at-point
+              (read-string "Git grep: "))))))
   (let ((root (string-trim (shell-command-to-string "git rev-parse --show-toplevel"))))
     (vc-git-grep pattern "*" root)))
 #+end_src
@@ -696,6 +705,13 @@ Works regardless of TERM value, through tmux and SSH.
 
 * Search
 
+Search prompts (=my-git-grep=, =rg-project-all=) mirror isearch's
+input conveniences (see =search-prompt-word-at-point.el=): if a
+region is active, its text pre-fills the prompt; otherwise, =C-w=
+pulls the word at point from the buffer the search was started from,
+one word at a time on repeated presses. Normal minibuffer =C-w=
+(kill-region) is unaffected everywhere else.
+
 #+begin_src emacs-lisp
 (use-package rg
   :ensure t
@@ -707,7 +723,21 @@ Works regardless of TERM value, through tmux and SSH.
     :query ask
     :format regexp
     :files "everything"
-    :dir project))
+    :dir project)
+  ;; Mirror isearch's input conveniences for rg's pattern prompt (see
+  ;; search-prompt-word-at-point.el): pre-fill from an active region
+  ;; if there is one, otherwise fall back to isearch-style `C-w'
+  ;; word-at-point yanking, same as `my-git-grep'.
+  (advice-add 'rg-read-pattern :filter-args
+              (lambda (args)
+                (let ((region (my-search-prompt-region-or-nil)))
+                  (if region
+                      (list (car args) region)
+                    args))))
+  (advice-add 'rg-read-pattern :around
+              (lambda (fn &rest args)
+                (my-search-prompt-with-word-at-point
+                 (apply fn args)))))
 #+end_src
 
 * Markdown
