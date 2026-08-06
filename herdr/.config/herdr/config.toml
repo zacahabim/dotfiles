@@ -1,0 +1,98 @@
+# herdr configuration
+# Adapted from tmux config - matching prefix, keybinding style, and theme
+
+[theme]
+# Match tmux green/black status bar style
+name = "terminal"
+
+[terminal]
+# Use $SHELL like tmux does
+default_shell = ""
+
+# Match tmux shell mode behavior
+shell_mode = "auto"
+
+# Inherit CWD like tmux does
+new_cwd = "follow"
+
+[keys]
+# Use ctrl+q as prefix - matching tmux prefix 'C-q'
+prefix = "ctrl+q"
+
+# Pane navigation (matching tmux hjkl style)
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# Splits (matching tmux-like intuition)
+split_vertical = "prefix+v"
+split_horizontal = "prefix+minus"
+
+# Tab management
+new_tab = "prefix+c"
+next_tab = "prefix+n"
+previous_tab = "prefix+p"
+switch_tab = "prefix+1..9"
+
+# Pane/window management (match tmux swap-pane behavior)
+close_pane = "prefix+x"
+zoom = "prefix+z"
+resize_mode = "prefix+r"
+
+# Workspace management
+workspace_picker = "prefix+w"
+new_workspace = "prefix+shift+n"
+rename_workspace = "prefix+shift+w"
+close_workspace = "prefix+shift+d"
+
+# Utility
+reload_config = "prefix+shift+r"
+help = "prefix+?"
+detach = "prefix+q"
+toggle_sidebar = "prefix+b"
+
+# Lazygit popup (similar to common tmux popup usage)
+[[keys.command]]
+key = "prefix+g"
+type = "popup"
+command = "lazygit"
+width = "80%"
+height = "80%"
+
+[ui]
+# Enable mouse (matching tmux 'set -g mouse on')
+mouse_capture = true
+copy_on_select = true
+
+# Show pane borders (like tmux pane-border-style)
+pane_borders = true
+pane_gaps = true
+
+# Don't prompt for names (like tmux silent window creation)
+prompt_new_tab_name = false
+prompt_new_workspace_name = false
+
+# Tab bar always visible (like tmux status bar)
+hide_tab_bar_when_single_tab = false
+
+# Sidebar settings
+sidebar_start_collapsed = false
+
+# Accent color - green to match tmux status-style bg=green
+accent = "green"
+
+[ui.toast]
+delivery = "herdr"
+
+[session]
+# Resume agents on restore (like tmux resurrect)
+resume_agents_on_restore = true
+
+[experimental]
+# Save pane history across restarts (like tmux history persistence)
+pane_history = true
+
+[advanced]
+# Large scrollback (matching tmux 'set -g history-limit 1000000')
+scrollback_limit_bytes = 100000000
