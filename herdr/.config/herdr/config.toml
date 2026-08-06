@@ -46,6 +46,9 @@ workspace_picker = "prefix+w"
 new_workspace = "prefix+shift+n"
 rename_workspace = "prefix+shift+w"
 close_workspace = "prefix+shift+d"
+next_workspace = "prefix+)"
+previous_workspace = "prefix+("
+switch_workspace = "prefix+shift+1..9"
 
 # Utility
 reload_config = "prefix+r"
